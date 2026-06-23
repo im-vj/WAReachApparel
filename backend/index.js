@@ -16,6 +16,12 @@ const PORT = process.env.PORT || 8080;
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 app.use(express.json());
 
+// Request logger
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 app.use('/api/contacts', contactRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/send', sendRoutes);
@@ -33,7 +39,7 @@ const init = async () => {
   }
 };
 
-app.listen(PORT, async () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log(`Server is running on port ${PORT}`);
   await init();
 });

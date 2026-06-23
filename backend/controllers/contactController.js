@@ -69,7 +69,7 @@ export const importContacts = async (req, res) => {
 
     // Execute all upserts in a single transaction for massive performance boost
     await prisma.$transaction(operations);
-    const imported = operations.length;
+    imported = operations.length;
 
     res.json({ message: `${imported} contacts imported successfully`, imported });
   } catch (error) {

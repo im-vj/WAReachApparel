@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import prisma from '../prismaClient.js';
 import { sendMessage } from '../services/whatsappService.js';
 import { sendQueue, sendQueueEvents } from '../queueSetup.js';
@@ -49,7 +49,7 @@ export const streamProgress = async (req, res) => {
 
 export const startSending = async (req, res) => {
   const { templateId, contactIds, delayMs = 3000, isTemplateMode = false } = req.body;
-  const clientId = uuidv4();
+  const clientId = crypto.randomUUID();
   
   try {
     await sendQueue.add('bulkSend', {

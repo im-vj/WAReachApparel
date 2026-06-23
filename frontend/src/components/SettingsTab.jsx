@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Save, ExternalLink, Activity } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../utils/api';
 
 export default function SettingsTab() {
@@ -31,13 +32,19 @@ export default function SettingsTab() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    const savePromise = api.post('/settings', settings);
+    
+    toast.promise(savePromise, {
+      loading: 'Saving settings...',
+      success: 'Settings saved! Backend will use these immediately.',
+      error: 'Failed to save settings'
+    });
+
     try {
       setLoading(true);
-      await api.post('/settings', settings);
-      alert('Settings saved successfully. Backend will use these immediately.');
+      await savePromise;
     } catch (err) {
       console.error(err);
-      alert('Failed to save settings');
     } finally {
       setLoading(false);
     }
@@ -45,7 +52,7 @@ export default function SettingsTab() {
 
   const handleTestConnection = async () => {
     if (!testPhone) {
-      alert("Please enter a phone number to test");
+      toast.error('Please enter a phone number to test');
       return;
     }
     

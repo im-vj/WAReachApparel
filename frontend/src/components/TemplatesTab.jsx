@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../utils/api';
+import ConfirmModal from './ConfirmModal';
 
 export default function TemplatesTab() {
   const [templates, setTemplates] = useState([]);
@@ -8,6 +10,10 @@ export default function TemplatesTab() {
   const [editingTemplate, setEditingTemplate] = useState(null);
   
   const [formData, setFormData] = useState({ name: '', content: '', metaTemplateName: '' });
+
+  // Confirmation Modal State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState(null);
 
   useEffect(() => {
     fetchTemplates();
@@ -40,28 +46,39 @@ export default function TemplatesTab() {
 
   const saveTemplate = async (e) => {
     e.preventDefault();
+    const savePromise = editingTemplate 
+      ? api.put(`/templates/${editingTemplate.id}`, formData)
+      : api.post('/templates', formData);
+
+    toast.promise(savePromise, {
+      loading: 'Saving template...',
+      success: 'Template saved successfully!',
+      error: 'Failed to save template'
+    });
+
     try {
-      if (editingTemplate) {
-        await api.put(`/templates/${editingTemplate.id}`, formData);
-      } else {
-        await api.post('/templates', formData);
-      }
+      await savePromise;
       fetchTemplates();
       closeModal();
     } catch (err) {
       console.error(err);
-      alert('Failed to save template');
     }
   };
 
-  const deleteTemplate = async (id) => {
-    if (!confirm('Are you sure you want to delete this template?')) return;
+  const confirmDelete = (id) => {
+    setTemplateToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!templateToDelete) return;
     try {
-      await api.delete(`/templates/${id}`);
+      await api.delete(`/templates/${templateToDelete}`);
+      toast.success('Template deleted');
       fetchTemplates();
     } catch (err) {
       console.error(err);
-      alert('Failed to delete template');
+      toast.error('Failed to delete template');
     }
   };
 
@@ -178,6 +195,15 @@ export default function TemplatesTab() {
           </div>
         </div>
       )}
+
+      <ConfirmModal 
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={executeDelete}
+        title="Delete Template"
+        message="Are you sure you want to delete this template? This action cannot be undone and will prevent campaigns from using it."
+        confirmText="Delete Template"
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Send, CheckSquare, Square, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../utils/api';
 
 export default function SendTab() {
@@ -54,6 +55,7 @@ export default function SendTab() {
       setSending(true);
       setLogs([]);
       setProgress({ total: selectedContacts.size, sent: 0, failed: 0 });
+      toast('Campaign started!', { icon: '🚀' });
 
       const res = await api.post('/send', {
         templateId: parseInt(selectedTemplateId),
@@ -89,7 +91,7 @@ export default function SendTab() {
         setProgress(data);
         setSending(false);
         eventSource.close();
-        alert(`Finished sending. ${data.sent} sent, ${data.failed} failed.`);
+        toast.success(`Finished sending. ${data.sent} sent, ${data.failed} failed.`);
       });
 
       eventSource.addEventListener('error', (e) => {
@@ -100,7 +102,7 @@ export default function SendTab() {
 
     } catch (err) {
       console.error(err);
-      alert('Failed to start sending');
+      toast.error('Failed to start sending');
       setSending(false);
     }
   };

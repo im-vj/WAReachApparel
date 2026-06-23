@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { Upload, Trash2, RefreshCw } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../utils/api';
+import ConfirmModal from './ConfirmModal';
 
 export default function ContactsTab() {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('ALL');
   const fileInputRef = useRef(null);
+  
+  const [modalState, setModalState] = useState({ isOpen: false, type: '', payload: null });
 
   useEffect(() => {
     fetchContacts();
@@ -19,7 +23,7 @@ export default function ContactsTab() {
       setContacts(res.data);
     } catch (err) {
       console.error(err);
-      alert('Failed to load contacts');
+      toast.error('Failed to load contacts');
     } finally {
       setLoading(false);
     }
@@ -32,40 +36,54 @@ export default function ContactsTab() {
     const formData = new FormData();
     formData.append('file', file);
 
+    const uploadPromise = api.post('/contacts/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
+    toast.promise(uploadPromise, {
+      loading: 'Importing contacts...',
+      success: (res) => res.data.message,
+      error: (err) => 'Import failed: ' + (err.response?.data?.error || err.message)
+    });
+
     try {
       setLoading(true);
-      const res = await api.post('/contacts/import', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      alert(res.data.message);
+      await uploadPromise;
       fetchContacts();
     } catch (err) {
       console.error(err);
-      alert('Failed to import contacts: ' + (err.response?.data?.error || err.message));
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  const deleteContact = async (id) => {
-    if (!confirm('Are you sure you want to delete this contact?')) return;
-    try {
-      await api.delete(`/contacts/${id}`);
-      setContacts(contacts.filter(c => c.id !== id));
-    } catch (err) {
-      console.error(err);
-      alert('Failed to delete contact');
-    }
+  const requestDelete = (id) => {
+    setModalState({ isOpen: true, type: 'delete', payload: id });
   };
 
-  const resetAll = async () => {
-    if (!confirm('Are you sure you want to reset all contacts to PENDING?')) return;
-    try {
-      await api.post('/contacts/reset');
-      fetchContacts();
-    } catch (err) {
-      console.error(err);
-      alert('Failed to reset contacts');
+  const requestReset = () => {
+    setModalState({ isOpen: true, type: 'reset', payload: null });
+  };
+
+  const executeModalAction = async () => {
+    if (modalState.type === 'delete') {
+      try {
+        await api.delete(`/contacts/${modalState.payload}`);
+        setContacts(contacts.filter(c => c.id !== modalState.payload));
+        toast.success('Contact deleted');
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to delete contact');
+      }
+    } else if (modalState.type === 'reset') {
+      try {
+        await api.post('/contacts/reset');
+        toast.success('All contacts reset to PENDING');
+        fetchContacts();
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to reset contacts');
+      }
     }
   };
 
@@ -100,7 +118,7 @@ export default function ContactsTab() {
             Upload Excel
           </button>
           <button 
-            onClick={resetAll}
+            onClick={requestReset}
             className="btn-secondary flex items-center"
             disabled={loading || contacts.length === 0}
           >
@@ -158,7 +176,7 @@ export default function ContactsTab() {
                   </td>
                   <td className="table-cell">
                     <button 
-                      onClick={() => deleteContact(contact.id)}
+                      onClick={() => requestDelete(contact.id)}
                       className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded transition-colors"
                       title="Delete Contact"
                     >
@@ -171,6 +189,18 @@ export default function ContactsTab() {
           </tbody>
         </table>
       </div>
+
+      <ConfirmModal 
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({ isOpen: false, type: '', payload: null })}
+        onConfirm={executeModalAction}
+        title={modalState.type === 'delete' ? 'Delete Contact' : 'Reset All Contacts'}
+        message={modalState.type === 'delete' 
+          ? 'Are you sure you want to delete this contact?' 
+          : 'Are you sure you want to reset all contacts to PENDING? This will allow you to message them again.'}
+        confirmText={modalState.type === 'delete' ? 'Delete' : 'Reset All'}
+        isDestructive={modalState.type === 'delete'}
+      />
     </div>
   );
 }

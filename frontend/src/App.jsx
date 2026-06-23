@@ -6,6 +6,8 @@ import SendTab from './components/SendTab';
 import LogTab from './components/LogTab';
 import SettingsTab from './components/SettingsTab';
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   const [activeTab, setActiveTab] = useState('contacts');
 
@@ -30,6 +32,22 @@ function App() {
 
   return (
     <div className="flex h-screen bg-bg-dark">
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: '#1f2937',
+            color: '#fff',
+            border: '1px solid #374151',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+        }} 
+      />
       {/* Sidebar */}
       <div className="w-64 bg-surface-dark border-r border-gray-800 flex flex-col">
         <div className="h-16 flex items-center px-6 border-b border-gray-800">

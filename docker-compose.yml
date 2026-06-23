@@ -1,7 +1,6 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: wareach_postgres
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-wareach_secure_user}
@@ -12,14 +11,12 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: wareach_redis
     restart: always
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: wareach_backend
     environment:
       WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID}
       WHATSAPP_BUSINESS_ACCOUNT_ID: ${WHATSAPP_BUSINESS_ACCOUNT_ID}
@@ -38,7 +35,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: wareach_frontend
     ports:
       - "5173:80"
     depends_on:

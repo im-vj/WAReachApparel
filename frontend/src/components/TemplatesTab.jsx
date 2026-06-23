@@ -1,0 +1,183 @@
+import { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import api from '../utils/api';
+
+export default function TemplatesTab() {
+  const [templates, setTemplates] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  
+  const [formData, setFormData] = useState({ name: '', content: '', metaTemplateName: '' });
+
+  useEffect(() => {
+    fetchTemplates();
+  }, []);
+
+  const fetchTemplates = async () => {
+    try {
+      const res = await api.get('/templates');
+      setTemplates(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const openModal = (template = null) => {
+    if (template) {
+      setEditingTemplate(template);
+      setFormData({ name: template.name, content: template.content, metaTemplateName: template.metaTemplateName || '' });
+    } else {
+      setEditingTemplate(null);
+      setFormData({ name: '', content: '', metaTemplateName: '' });
+    }
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingTemplate(null);
+  };
+
+  const saveTemplate = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingTemplate) {
+        await api.put(`/templates/${editingTemplate.id}`, formData);
+      } else {
+        await api.post('/templates', formData);
+      }
+      fetchTemplates();
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save template');
+    }
+  };
+
+  const deleteTemplate = async (id) => {
+    if (!confirm('Are you sure you want to delete this template?')) return;
+    try {
+      await api.delete(`/templates/${id}`);
+      fetchTemplates();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete template');
+    }
+  };
+
+  const renderPreview = (content) => {
+    if (!content) return '';
+    return content.replace(/\{name\}/g, 'Abdul').replace(/\n/g, '<br/>');
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium text-gray-300">Message Templates</h3>
+        <button onClick={() => openModal()} className="btn-primary flex items-center">
+          <Plus className="w-4 h-4 mr-2" />
+          Create Template
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {templates.map(template => (
+          <div key={template.id} className="card flex flex-col">
+            <div className="flex justify-between items-start mb-4">
+              <h4 className="font-semibold text-lg">{template.name}</h4>
+              <div className="flex gap-2">
+                <button onClick={() => openModal(template)} className="text-gray-400 hover:text-white transition-colors">
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button onClick={() => deleteTemplate(template.id)} className="text-gray-400 hover:text-red-400 transition-colors">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            {template.metaTemplateName && (
+              <div className="mb-3 text-xs bg-gray-800 px-2 py-1 rounded inline-block text-gray-400 w-max">
+                Meta Template: {template.metaTemplateName}
+              </div>
+            )}
+            <div className="bg-gray-800/50 rounded p-4 text-sm text-gray-300 flex-1 whitespace-pre-wrap overflow-hidden" style={{ maxHeight: '200px' }}>
+              {template.content}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-surface-dark rounded-xl shadow-2xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden border border-gray-700">
+            {/* Form Side */}
+            <div className="p-6 md:w-1/2 border-b md:border-b-0 md:border-r border-gray-700">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold">{editingTemplate ? 'Edit Template' : 'New Template'}</h3>
+                <button onClick={closeModal} className="text-gray-400 hover:text-white md:hidden">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={saveTemplate} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Display Name</label>
+                  <input
+                    type="text"
+                    required
+                    className="input-field"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    placeholder="e.g. Cold Outreach V1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Meta Template Name (Optional)
+                    <span className="block text-xs text-gray-500 font-normal">Required for cold outreach. Must match Meta dashboard exactly.</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="input-field"
+                    value={formData.metaTemplateName}
+                    onChange={(e) => setFormData({...formData, metaTemplateName: e.target.value})}
+                    placeholder="e.g. cordestitch_outreach"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Message Content
+                    <span className="block text-xs text-gray-500 font-normal">Use {"{name}"} to insert the contact's name.</span>
+                  </label>
+                  <textarea
+                    required
+                    rows="8"
+                    className="input-field resize-none"
+                    value={formData.content}
+                    onChange={(e) => setFormData({...formData, content: e.target.value})}
+                  ></textarea>
+                </div>
+                <div className="pt-4 flex justify-end gap-3">
+                  <button type="button" onClick={closeModal} className="btn-secondary">Cancel</button>
+                  <button type="submit" className="btn-primary">Save Template</button>
+                </div>
+              </form>
+            </div>
+            {/* Preview Side */}
+            <div className="p-6 md:w-1/2 bg-gray-900 flex flex-col relative">
+              <div className="absolute top-4 right-4 hidden md:block">
+                <button onClick={closeModal} className="text-gray-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <h4 className="text-sm font-medium text-gray-400 mb-4 uppercase tracking-wider">Live Preview</h4>
+              <div className="flex-1 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-cover rounded-lg p-4 flex flex-col border border-gray-800">
+                <div className="bg-white text-gray-800 rounded-lg rounded-tl-none p-3 shadow-sm max-w-[85%] self-start text-sm"
+                     dangerouslySetInnerHTML={{ __html: renderPreview(formData.content) || '<span class="text-gray-400 italic">Message preview will appear here...</span>' }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

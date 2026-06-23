@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Contact {
+  id           Int       @id @default(autoincrement())
+  countryCode  String?
+  phoneNumber  String    @unique
+  savedName    String?
+  displayName  String?
+  isAdmin      Boolean   @default(false)
+  status       String    @default("PENDING") // PENDING, SENT, FAILED, SKIPPED
+  waMessageId  String?
+  sentAt       DateTime?
+  errorMessage String?
+
+  sendLogs     SendLog[]
+}
+
+model MessageTemplate {
+  id               Int       @id @default(autoincrement())
+  name             String    @unique
+  content          String
+  metaTemplateName String?
+
+  sendLogs         SendLog[]
+}
+
+model SendLog {
+  id              Int       @id @default(autoincrement())
+  contactId       Int
+  templateId      Int
+  renderedMessage String
+  waMessageId     String?
+  sentAt          DateTime  @default(now())
+  responseStatus  String?
+  responseBody    String?
+
+  contact         Contact         @relation(fields: [contactId], references: [id])
+  template        MessageTemplate @relation(fields: [templateId], references: [id])
+}
+
+model AppSetting {
+  key   String @id
+  value String
+}

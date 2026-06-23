@@ -40,7 +40,9 @@ export const importContacts = async (req, res) => {
       if (!phoneCell) continue;
       let phoneNumber = String(phoneCell).replace(/[^0-9]/g, '');
 
-      if (!phoneNumber || phoneNumber.includes('NaN') || String(phoneCell).toLowerCase().includes('free version')) {
+      if (!phoneNumber || phoneNumber.includes('NaN') || 
+          String(phoneCell).toLowerCase().includes('free version') ||
+          (row[0] && String(row[0]).toLowerCase().includes('free version'))) {
         continue;
       }
 
@@ -48,16 +50,25 @@ export const importContacts = async (req, res) => {
 
       let name = displayName || savedName || 'User';
 
+      let countryCode = null;
+      if (row[0] && String(row[0]).startsWith('+')) {
+        countryCode = String(row[0]).trim();
+      } else if (phoneNumber.startsWith('91')) {
+        countryCode = '+91'; // Fallback if missing but phone indicates India
+      }
+
       operations.push(
         prisma.contact.upsert({
           where: { phoneNumber },
           update: {
             displayName: name,
             savedName,
+            countryCode,
             isAdmin
           },
           create: {
             phoneNumber,
+            countryCode,
             displayName: name,
             savedName,
             isAdmin,

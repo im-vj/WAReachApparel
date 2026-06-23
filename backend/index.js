@@ -10,11 +10,23 @@ import { initSettings } from './services/settingsService.js';
 import { initTemplates } from './services/templateService.js';
 import './workers/sendWorker.js';
 
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
+
+// Basic rate limiting to prevent brute-force and DDoS
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // limit each IP to 1000 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+});
+app.use('/api/', apiLimiter);
 
 // Request logger
 app.use((req, res, next) => {

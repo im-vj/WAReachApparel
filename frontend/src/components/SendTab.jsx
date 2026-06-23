@@ -285,9 +285,9 @@ export default function SendTab() {
             <h3 className="font-medium mb-4 text-gray-400 uppercase tracking-wider text-xs">Message Preview</h3>
             {selectedTemplate ? (
               <div className="bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-cover rounded-lg p-4 h-80 overflow-y-auto flex flex-col border border-gray-800">
-                <div className="bg-white text-gray-800 rounded-lg rounded-tl-none p-3 shadow-sm max-w-[85%] self-start text-sm whitespace-pre-wrap"
-                     dangerouslySetInnerHTML={{ __html: selectedTemplate.content.replace(/\{name\}/g, previewName).replace(/\n/g, '<br/>') }}
-                />
+                <div className="bg-white text-gray-800 rounded-lg rounded-tl-none p-3 shadow-sm max-w-[85%] self-start text-sm whitespace-pre-wrap">
+                  {selectedTemplate.content.replace(/\{name\}/g, previewName)}
+                </div>
               </div>
             ) : (
               <div className="bg-gray-800 rounded-lg h-80 flex items-center justify-center text-gray-500 text-sm text-center p-6 border border-gray-700">

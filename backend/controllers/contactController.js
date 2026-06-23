@@ -1,5 +1,5 @@
 import prisma from '../prismaClient.js';
-import xlsx from 'xlsx';
+import ExcelJS from 'exceljs';
 
 export const getAllContacts = async (req, res) => {
   try {
@@ -14,45 +14,46 @@ export const importContacts = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
-    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
-    let sheetName = 'WA-Download Group Phone Numbers';
-    let sheet = workbook.Sheets[sheetName];
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(req.file.buffer);
     
-    if (!sheet) {
-      sheetName = workbook.SheetNames[0];
-      sheet = workbook.Sheets[sheetName];
-    }
+    // Get the specified sheet or fallback to the first one
+    let sheet = workbook.getWorksheet('WA-Download Group Phone Numbers') || workbook.worksheets[0];
 
-    const data = xlsx.utils.sheet_to_json(sheet, { header: 1 });
     let imported = 0;
-
     const operations = [];
 
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      if (!row || row.length === 0) continue;
+    sheet.eachRow((row, rowNumber) => {
+      // Skip header row
+      if (rowNumber === 1) return;
 
-      const phoneCell = row[1];
-      const savedName = row[2] ? String(row[2]).trim() : '';
-      const displayName = row[3] ? String(row[3]).trim() : '';
-      const isAdmin = String(row[4]).toLowerCase() === 'yes';
+      const colA = row.getCell(1).value; // Country Code or Warning
+      const colB = row.getCell(2).value; // Phone Number
+      const colC = row.getCell(3).value; // Saved Name
+      const colD = row.getCell(4).value; // Display Name
+      const colE = row.getCell(5).value; // Is Admin?
 
-      if (!phoneCell) continue;
+      const phoneCell = colB ? String(colB).trim() : '';
+      const savedName = colC ? String(colC).trim() : '';
+      const displayName = colD ? String(colD).trim() : '';
+      const isAdmin = String(colE).toLowerCase() === 'yes';
+
+      if (!phoneCell) return;
       let phoneNumber = String(phoneCell).replace(/[^0-9]/g, '');
 
       if (!phoneNumber || phoneNumber.includes('NaN') || 
           String(phoneCell).toLowerCase().includes('free version') ||
-          (row[0] && String(row[0]).toLowerCase().includes('free version'))) {
-        continue;
+          (colA && String(colA).toLowerCase().includes('free version'))) {
+        return;
       }
 
-      if (phoneNumber.length < 10) continue;
+      if (phoneNumber.length < 10) return;
 
       let name = displayName || savedName || 'User';
 
       let countryCode = null;
-      if (row[0] && String(row[0]).startsWith('+')) {
-        countryCode = String(row[0]).trim();
+      if (colA && String(colA).startsWith('+')) {
+        countryCode = String(colA).trim();
       } else if (phoneNumber.startsWith('91')) {
         countryCode = '+91'; // Fallback if missing but phone indicates India
       }
@@ -76,7 +77,7 @@ export const importContacts = async (req, res) => {
           }
         })
       );
-    }
+    });
 
     // Execute all upserts in a single transaction for massive performance boost
     await prisma.$transaction(operations);

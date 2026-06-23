@@ -84,7 +84,7 @@ export default function TemplatesTab() {
 
   const renderPreview = (content) => {
     if (!content) return '';
-    return content.replace(/\{name\}/g, 'Abdul').replace(/\n/g, '<br/>');
+    return content.replace(/\{name\}/g, 'Abdul');
   };
 
   return (
@@ -187,9 +187,9 @@ export default function TemplatesTab() {
               </div>
               <h4 className="text-sm font-medium text-gray-400 mb-4 uppercase tracking-wider">Live Preview</h4>
               <div className="flex-1 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-cover rounded-lg p-4 flex flex-col border border-gray-800">
-                <div className="bg-white text-gray-800 rounded-lg rounded-tl-none p-3 shadow-sm max-w-[85%] self-start text-sm"
-                     dangerouslySetInnerHTML={{ __html: renderPreview(formData.content) || '<span class="text-gray-400 italic">Message preview will appear here...</span>' }}
-                />
+                <div className="bg-white text-gray-800 rounded-lg rounded-tl-none p-3 shadow-sm max-w-[85%] self-start text-sm whitespace-pre-wrap">
+                     {formData.content ? renderPreview(formData.content) : <span className="text-gray-400 italic">Message preview will appear here...</span>}
+                </div>
               </div>
             </div>
           </div>

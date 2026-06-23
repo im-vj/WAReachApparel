@@ -1,12 +1,12 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
     container_name: wareach_postgres
     restart: always
-    env_file:
-      - ./backend/.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-wareach_secure_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-wareach_production}
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -22,8 +22,13 @@ services:
     container_name: wareach_backend
     ports:
       - "8080:8080"
-    volumes:
-      - ./backend/.env:/app/.env
+    environment:
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID}
+      WHATSAPP_BUSINESS_ACCOUNT_ID: ${WHATSAPP_BUSINESS_ACCOUNT_ID}
+      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN}
+      WHATSAPP_API_VERSION: ${WHATSAPP_API_VERSION:-v25.0}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://wareach_secure_user:password@db:5432/wareach_production?schema=public}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
     restart: unless-stopped
     depends_on:
       - db

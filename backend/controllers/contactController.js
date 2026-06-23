@@ -26,6 +26,8 @@ export const importContacts = async (req, res) => {
     const data = xlsx.utils.sheet_to_json(sheet, { header: 1 });
     let imported = 0;
 
+    const operations = [];
+
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       if (!row || row.length === 0) continue;
@@ -46,23 +48,28 @@ export const importContacts = async (req, res) => {
 
       let name = displayName || savedName || 'User';
 
-      await prisma.contact.upsert({
-        where: { phoneNumber },
-        update: {
-          displayName: name,
-          savedName,
-          isAdmin
-        },
-        create: {
-          phoneNumber,
-          displayName: name,
-          savedName,
-          isAdmin,
-          status: 'PENDING'
-        }
-      });
-      imported++;
+      operations.push(
+        prisma.contact.upsert({
+          where: { phoneNumber },
+          update: {
+            displayName: name,
+            savedName,
+            isAdmin
+          },
+          create: {
+            phoneNumber,
+            displayName: name,
+            savedName,
+            isAdmin,
+            status: 'PENDING'
+          }
+        })
+      );
     }
+
+    // Execute all upserts in a single transaction for massive performance boost
+    await prisma.$transaction(operations);
+    const imported = operations.length;
 
     res.json({ message: `${imported} contacts imported successfully`, imported });
   } catch (error) {

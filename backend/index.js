@@ -8,6 +8,7 @@ import logRoutes from './routes/logRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 import { initSettings } from './services/settingsService.js';
 import { initTemplates } from './services/templateService.js';
+import './workers/sendWorker.js';
 
 const app = express();
 const PORT = process.env.PORT || 8080;

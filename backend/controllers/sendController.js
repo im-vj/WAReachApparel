@@ -1,10 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import prisma from '../prismaClient.js';
 import { sendMessage } from '../services/whatsappService.js';
+import { sendQueue, sendQueueEvents } from '../queueSetup.js';
 
-const clients = new Map();
-
-export const streamProgress = (req, res) => {
+export const streamProgress = async (req, res) => {
   const { clientId } = req.params;
   
   res.setHeader('Content-Type', 'text/event-stream');
@@ -13,136 +12,57 @@ export const streamProgress = (req, res) => {
   res.flushHeaders();
   
   res.write(`event: init\ndata: "Connected"\n\n`);
-  
-  clients.set(clientId, res);
+
+  const onProgress = ({ jobId, data }) => {
+    if (jobId === clientId) {
+      if (typeof data === 'object') {
+        res.write(`event: progress\ndata: ${JSON.stringify({ total: data.total, sent: data.sent, failed: data.failed })}\n\n`);
+        if (data.current) {
+          res.write(`event: status\ndata: ${JSON.stringify(data.current)}\n\n`);
+        }
+      }
+    }
+  };
+
+  const onCompleted = ({ jobId, returnvalue }) => {
+    if (jobId === clientId) {
+      res.write(`event: complete\ndata: ${JSON.stringify(returnvalue || {})}\n\n`);
+    }
+  };
+
+  const onFailed = ({ jobId, failedReason }) => {
+    if (jobId === clientId) {
+      res.write(`event: error\ndata: ${JSON.stringify(failedReason)}\n\n`);
+    }
+  };
+
+  sendQueueEvents.on('progress', onProgress);
+  sendQueueEvents.on('completed', onCompleted);
+  sendQueueEvents.on('failed', onFailed);
   
   req.on('close', () => {
-    clients.delete(clientId);
+    sendQueueEvents.off('progress', onProgress);
+    sendQueueEvents.off('completed', onCompleted);
+    sendQueueEvents.off('failed', onFailed);
   });
 };
-
-const sendEvent = (clientId, eventName, data) => {
-  const res = clients.get(clientId);
-  if (res) {
-    res.write(`event: ${eventName}\ndata: ${JSON.stringify(data)}\n\n`);
-  }
-};
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const startSending = async (req, res) => {
   const { templateId, contactIds, delayMs = 3000, isTemplateMode = false } = req.body;
   const clientId = uuidv4();
   
-  res.json({ clientId, message: 'Sending started' });
+  try {
+    await sendQueue.add('bulkSend', {
+      templateId,
+      contactIds,
+      delayMs,
+      isTemplateMode
+    }, { jobId: clientId });
 
-  // Run bulk send asynchronously
-  (async () => {
-    try {
-      const template = await prisma.messageTemplate.findUnique({ where: { id: Number(templateId) } });
-      if (!template) {
-        sendEvent(clientId, 'error', 'Template not found');
-        return;
-      }
-
-      sendEvent(clientId, 'progress', { total: contactIds.length, sent: 0, failed: 0 });
-      
-      let sent = 0;
-      let failed = 0;
-
-      for (const contactId of contactIds) {
-        const contact = await prisma.contact.findUnique({ where: { id: Number(contactId) } });
-        if (!contact) continue;
-
-        const renderedMessage = template.content.replace(/\{name\}/g, contact.displayName || '');
-        
-        sendEvent(clientId, 'status', {
-          contactId: contact.id,
-          name: contact.displayName,
-          status: 'SENDING',
-          message: `Sending to ${contact.displayName}...`
-        });
-
-        let waRes = await sendMessage(
-          contact.phoneNumber,
-          renderedMessage,
-          isTemplateMode,
-          template.metaTemplateName,
-          contact.displayName
-        );
-
-        if (!waRes.success && waRes.isRateLimited) {
-          sendEvent(clientId, 'status', {
-            contactId: contact.id,
-            name: contact.displayName,
-            status: 'RATE_LIMITED',
-            message: 'Rate limited. Waiting 60s...'
-          });
-          await sleep(60000);
-          waRes = await sendMessage(
-            contact.phoneNumber,
-            renderedMessage,
-            isTemplateMode,
-            template.metaTemplateName,
-            contact.displayName
-          );
-        }
-
-        // Save SendLog
-        await prisma.sendLog.create({
-          data: {
-            contactId: contact.id,
-            templateId: template.id,
-            renderedMessage,
-            waMessageId: waRes.messageId,
-            responseStatus: waRes.success ? 'SUCCESS' : 'FAILED',
-            responseBody: waRes.fullResponse
-          }
-        });
-
-        // Update Contact
-        await prisma.contact.update({
-          where: { id: contact.id },
-          data: {
-            status: waRes.success ? 'SENT' : 'FAILED',
-            waMessageId: waRes.messageId || null,
-            sentAt: waRes.success ? new Date() : null,
-            errorMessage: waRes.success ? null : waRes.error
-          }
-        });
-
-        if (waRes.success) {
-          sent++;
-          sendEvent(clientId, 'status', {
-            contactId: contact.id,
-            name: contact.displayName,
-            status: 'SENT',
-            message: `Sent (msg id: ${waRes.messageId})`
-          });
-        } else {
-          failed++;
-          sendEvent(clientId, 'status', {
-            contactId: contact.id,
-            name: contact.displayName,
-            status: 'FAILED',
-            message: `Failed: ${waRes.error}`
-          });
-        }
-
-        sendEvent(clientId, 'progress', { total: contactIds.length, sent, failed });
-
-        if (delayMs > 0) {
-          await sleep(delayMs);
-        }
-      }
-
-      sendEvent(clientId, 'complete', { total: contactIds.length, sent, failed });
-
-    } catch (err) {
-      console.error('Bulk send error:', err);
-      sendEvent(clientId, 'error', err.message);
-    }
-  })();
+    res.json({ clientId, message: 'Sending started' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 export const sendTest = async (req, res) => {

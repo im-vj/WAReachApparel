@@ -8,7 +8,7 @@ export const sendMessage = async (phoneNumber, message, isTemplateMode, template
     const settings = await getSettingsMap();
     const phoneId = settings['whatsapp.phone-number-id'] || process.env.WHATSAPP_PHONE_NUMBER_ID;
     const accessToken = settings['whatsapp.access-token'] || process.env.WHATSAPP_ACCESS_TOKEN;
-    const apiVersion = settings['whatsapp.api-version'] || process.env.WHATSAPP_API_VERSION || 'v19.0';
+    const apiVersion = settings['whatsapp.api-version'] || process.env.WHATSAPP_API_VERSION || 'v25.0';
     
     if (!phoneId || !accessToken) {
       throw new Error('WhatsApp API credentials are not configured in settings.');

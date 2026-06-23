@@ -7,7 +7,7 @@ export default function SettingsTab() {
     'whatsapp.phone-number-id': '',
     'whatsapp.business-account-id': '',
     'whatsapp.access-token': '',
-    'whatsapp.api-version': 'v19.0'
+    'whatsapp.api-version': 'v25.0'
   });
   const [loading, setLoading] = useState(false);
   const [showToken, setShowToken] = useState(false);
@@ -123,7 +123,7 @@ export default function SettingsTab() {
               className="input-field w-32"
               value={settings['whatsapp.api-version']}
               onChange={(e) => setSettings({...settings, 'whatsapp.api-version': e.target.value})}
-              placeholder="v19.0"
+              placeholder="v25.0"
             />
           </div>
 

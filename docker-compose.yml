@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: wareach_backend
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount the database file and env file directly from the host so they persist and are editable
+      - ./backend/dev.db:/app/dev.db
+      - ./backend/.env:/app/.env
+    restart: unless-stopped
+    command: >
+      sh -c "npx prisma db push && npm start"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: wareach_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

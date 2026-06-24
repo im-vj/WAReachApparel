@@ -25,6 +25,8 @@ services:
       DATABASE_URL: ${DATABASE_URL:-postgresql://wareach_secure_user:password@wareach_db:5432/wareach_production?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://wareach_redis:6379}
     restart: unless-stopped
+    volumes:
+      - wareach_uploads:/app/uploads
     depends_on:
       - wareach_db
       - wareach_redis
@@ -43,3 +45,4 @@ services:
 
 volumes:
   pgdata:
+  wareach_uploads:

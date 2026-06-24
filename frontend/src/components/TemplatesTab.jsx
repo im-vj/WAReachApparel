@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Edit2, Trash2, X, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 import ConfirmModal from './ConfirmModal';
@@ -10,6 +10,8 @@ export default function TemplatesTab() {
   const [editingTemplate, setEditingTemplate] = useState(null);
   
   const [formData, setFormData] = useState({ name: '', content: '', metaTemplateName: '', headerDocumentUrl: '', headerDocumentFilename: '' });
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Confirmation Modal State
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -48,6 +50,54 @@ export default function TemplatesTab() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingTemplate(null);
+    setIsUploading(false);
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      toast.error('Only PDF files are supported.');
+      return;
+    }
+
+    const formDataObj = new FormData();
+    formDataObj.append('file', file);
+
+    try {
+      setIsUploading(true);
+      const res = await api.post('/upload', formDataObj, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      // Since it's hosted behind a proxy or specific domain, we use the URL returned by the backend, 
+      // but ensure it's absolute. The backend should return the absolute URL.
+      let uploadedUrl = res.data.url;
+      // Force https and correct domain just in case the proxy headers weren't perfect locally
+      if (window.location.hostname === 'wareach.cordestitch.com') {
+         uploadedUrl = `https://wareach.cordestitch.com/api/uploads/${res.data.storedFilename}`;
+      } else if (uploadedUrl.startsWith('http://localhost') && window.location.hostname !== 'localhost') {
+         // Fallback if the backend thought it was localhost but we are on a different host
+         uploadedUrl = `${window.location.protocol}//${window.location.host}/api/uploads/${res.data.storedFilename}`;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        headerDocumentUrl: uploadedUrl,
+        headerDocumentFilename: res.data.filename
+      }));
+      toast.success('PDF uploaded successfully!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to upload PDF');
+    } finally {
+      setIsUploading(false);
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const saveTemplate = async (e) => {
@@ -176,13 +226,31 @@ export default function TemplatesTab() {
                     Header Document URL (Optional)
                     <span className="block text-xs text-gray-500 font-normal">Direct link to a PDF to include as a header.</span>
                   </label>
-                  <input
-                    type="url"
-                    className="input-field"
-                    value={formData.headerDocumentUrl}
-                    onChange={(e) => setFormData({...formData, headerDocumentUrl: e.target.value})}
-                    placeholder="https://example.com/brochure.pdf"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      className="input-field flex-1"
+                      value={formData.headerDocumentUrl}
+                      onChange={(e) => setFormData({...formData, headerDocumentUrl: e.target.value})}
+                      placeholder="https://example.com/brochure.pdf"
+                    />
+                    <input 
+                      type="file" 
+                      accept=".pdf" 
+                      className="hidden" 
+                      ref={fileInputRef} 
+                      onChange={handleFileUpload} 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                      className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 rounded-lg flex items-center transition-colors border border-gray-700 disabled:opacity-50 whitespace-nowrap"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {isUploading ? 'Uploading...' : 'Upload PDF'}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">

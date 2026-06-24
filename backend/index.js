@@ -9,9 +9,17 @@ import settingsRoutes from './routes/settingsRoutes.js';
 import { initSettings } from './services/settingsService.js';
 import { initTemplates } from './services/templateService.js';
 import './workers/sendWorker.js';
+import uploadRoutes from './routes/uploadRoutes.js';
+
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -39,6 +47,11 @@ app.use('/api/templates', templateRoutes);
 app.use('/api/send', sendRoutes);
 app.use('/api/log', logRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/upload', uploadRoutes);
+
+// Serve uploads folder statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // Initialize DB defaults
 const init = async () => {

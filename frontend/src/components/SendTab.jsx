@@ -191,29 +191,29 @@ export default function SendTab() {
             </div>
           </div>
           
-          <div className="max-h-96 overflow-y-auto border border-gray-700 rounded-lg">
-            <table className="min-w-full divide-y divide-gray-700">
-              <thead className="bg-gray-800 sticky top-0">
+          <div className="table-container max-h-96 overflow-y-auto">
+            <table className="min-w-full divide-y divide-gray-800/50">
+              <thead className="bg-gray-900/80 sticky top-0 z-10 backdrop-blur-sm">
                 <tr>
-                  <th className="px-4 py-2 text-left w-10"></th>
-                  <th className="px-4 py-2 text-left text-xs font-semibold text-gray-300 uppercase">Name</th>
-                  <th className="px-4 py-2 text-left text-xs font-semibold text-gray-300 uppercase">Phone</th>
-                  <th className="px-4 py-2 text-left text-xs font-semibold text-gray-300 uppercase">Status</th>
+                  <th className="px-6 py-4 text-left w-10"></th>
+                  <th className="table-header">Name</th>
+                  <th className="table-header">Phone</th>
+                  <th className="table-header">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800 bg-surface-dark">
+              <tbody className="divide-y divide-gray-800/50 bg-surface-dark">
                 {contacts.map(contact => (
-                  <tr key={contact.id} className="hover:bg-gray-700/50 cursor-pointer" onClick={() => !sending && toggleContact(contact.id)}>
-                    <td className="px-4 py-2">
+                  <tr key={contact.id} className="hover:bg-gray-800/40 cursor-pointer transition-colors group" onClick={() => !sending && toggleContact(contact.id)}>
+                    <td className="table-cell">
                       {selectedContacts.has(contact.id) ? 
-                        <CheckSquare className="w-5 h-5 text-primary" /> : 
-                        <Square className="w-5 h-5 text-gray-500" />
+                        <CheckSquare className="w-5 h-5 text-primary transition-transform group-hover:scale-110" /> : 
+                        <Square className="w-5 h-5 text-gray-500 transition-transform group-hover:scale-110" />
                       }
                     </td>
-                    <td className="px-4 py-2 text-sm">{contact.displayName || contact.savedName}</td>
-                    <td className="px-4 py-2 text-sm text-gray-400">+{contact.phoneNumber}</td>
-                    <td className="px-4 py-2 text-sm">
-                      <span className={`px-2 py-0.5 rounded text-xs ${contact.status === 'SENT' ? 'bg-green-900/50 text-green-400' : contact.status === 'FAILED' ? 'bg-red-900/50 text-red-400' : 'bg-gray-800 text-gray-400'}`}>
+                    <td className="table-cell font-medium">{contact.displayName || contact.savedName}</td>
+                    <td className="table-cell text-gray-400">+{contact.phoneNumber}</td>
+                    <td className="table-cell">
+                      <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${contact.status === 'SENT' ? 'bg-green-500/10 text-green-400 border-green-500/20' : contact.status === 'FAILED' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-gray-800 text-gray-400 border-gray-700'}`}>
                         {contact.status}
                       </span>
                     </td>
@@ -268,25 +268,30 @@ export default function SendTab() {
               </div>
             )}
 
-            <div className="bg-black/40 rounded-lg p-3 h-64 overflow-y-auto font-mono text-xs space-y-2 border border-gray-800">
+            <div className="bg-gray-950 rounded-xl p-4 h-64 overflow-y-auto font-mono text-xs space-y-2.5 border border-gray-800/80 shadow-inner relative">
+              <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-gray-950 to-transparent pointer-events-none"></div>
               {logs.map((log, idx) => (
-                <div key={idx} className={`flex items-start ${log.status === 'FAILED' ? 'text-red-400' : log.status === 'SENT' ? 'text-green-400' : log.status === 'RATE_LIMITED' ? 'text-yellow-400' : 'text-gray-300'}`}>
-                  <span className="mr-2">
-                    {log.status === 'SENT' ? '✅' : log.status === 'FAILED' ? '❌' : log.status === 'RATE_LIMITED' ? '⚠️' : '⏳'}
+                <div key={idx} className={`flex items-start ${log.status === 'FAILED' ? 'text-red-400' : log.status === 'SENT' ? 'text-primary' : log.status === 'RATE_LIMITED' ? 'text-yellow-400' : 'text-gray-300'} animate-in fade-in slide-in-from-bottom-1`}>
+                  <span className="mr-2.5 mt-0.5">
+                    {log.status === 'SENT' ? '✓' : log.status === 'FAILED' ? '✗' : log.status === 'RATE_LIMITED' ? '⚠' : '⟳'}
                   </span>
-                  <span>{log.message}</span>
+                  <span className="leading-relaxed">{log.message}</span>
                 </div>
               ))}
-              {logs.length === 0 && <div className="text-gray-500 italic">Waiting for logs...</div>}
+              {logs.length === 0 && <div className="text-gray-500/70 italic absolute inset-0 flex items-center justify-center">Awaiting terminal output...</div>}
             </div>
           </div>
         ) : (
           <div className="card">
             <h3 className="font-medium mb-4 text-gray-400 uppercase tracking-wider text-xs">Message Preview</h3>
             {selectedTemplate ? (
-              <div className="bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-cover rounded-lg p-4 h-80 overflow-y-auto flex flex-col border border-gray-800">
-                <div className="bg-white text-gray-800 rounded-lg rounded-tl-none p-3 shadow-sm max-w-[85%] self-start text-sm whitespace-pre-wrap">
-                  {selectedTemplate.content.replace(/\{name\}/g, previewName)}
+              <div className="bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-cover rounded-xl p-5 h-80 overflow-y-auto flex flex-col border border-gray-700/50 shadow-inner relative">
+                <div className="absolute inset-0 bg-black/5 pointer-events-none"></div>
+                <div className="bg-white text-gray-800 rounded-xl rounded-tl-none p-4 shadow-sm max-w-[85%] self-start text-[14.5px] leading-snug whitespace-pre-wrap relative z-10">
+                  <svg viewBox="0 0 8 13" width="8" height="13" className="absolute top-0 -left-2 text-white fill-current drop-shadow-sm">
+                    <path d="M5.188 1H0v11.142l4.969-5.063A2 2 0 0 0 5.188 1z" />
+                  </svg>
+                  <span className="text-gray-900">{selectedTemplate.content.replace(/\{name\}/g, previewName)}</span>
                 </div>
               </div>
             ) : (

@@ -4,54 +4,54 @@
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-all duration-300 shadow-md hover:shadow-primary/20 hover:-translate-y-0.5 border border-primary/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
   }
   
   .btn-secondary {
-    @apply px-4 py-2 bg-surface-dark-light hover:bg-gray-600 text-white rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-4 py-2 bg-surface-dark-light hover:bg-gray-600 text-gray-200 rounded-lg font-medium transition-all duration-300 shadow-sm hover:-translate-y-0.5 border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
   }
 
   .btn-danger {
-    @apply px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg font-medium transition-all duration-300 shadow-sm border border-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .input-field {
-    @apply w-full bg-surface-dark border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+    @apply w-full bg-surface-dark/50 border border-gray-700/60 rounded-lg px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 hover:border-gray-600 transition-colors shadow-inner;
   }
   
   .card {
-    @apply bg-surface-dark rounded-lg shadow-lg border border-gray-800 p-6;
+    @apply bg-surface-dark rounded-xl shadow-lg border border-gray-800/60 p-6 hover:border-gray-700 transition-all duration-300 relative overflow-hidden;
   }
 
   .table-container {
-    @apply w-full overflow-x-auto rounded-lg border border-gray-700 bg-surface-dark;
+    @apply w-full overflow-hidden rounded-xl border border-gray-800/80 bg-surface-dark shadow-xl;
   }
 
   .table-header {
-    @apply bg-gray-800 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider;
+    @apply bg-gray-900/80 text-left text-xs font-bold text-gray-400 uppercase tracking-widest px-6 py-4;
   }
 
   .table-cell {
-    @apply px-6 py-4 whitespace-nowrap text-sm border-b border-gray-700;
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-300 border-b border-gray-800/50 group-hover:bg-gray-800/30 transition-colors;
   }
 }
 
-/* Custom Sleek Scrollbar */
-.custom-scrollbar, textarea.input-field {
+/* Universal Sleek Scrollbar */
+* {
   scrollbar-width: thin;
   scrollbar-color: #4b5563 transparent;
 }
-.custom-scrollbar::-webkit-scrollbar, textarea.input-field::-webkit-scrollbar {
+*::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-.custom-scrollbar::-webkit-scrollbar-track, textarea.input-field::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
   background: transparent;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb, textarea.input-field::-webkit-scrollbar-thumb {
-  background-color: #4b5563; /* gray-600 */
+*::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
   border-radius: 20px;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover, textarea.input-field::-webkit-scrollbar-thumb:hover {
-  background-color: #6b7280; /* gray-500 */
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #6b7280;
 }

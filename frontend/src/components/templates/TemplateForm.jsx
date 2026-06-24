@@ -12,7 +12,7 @@ export default function TemplateForm({
 }) {
   return (
     <form onSubmit={saveTemplate} className="space-y-5 p-1 h-full flex flex-col">
-      <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+      <div className="space-y-4 flex-1 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-500" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4b5563 transparent' }}>
         {/* Display Name */}
         <div>
           <label className="block text-sm font-semibold text-gray-300 mb-1.5">Display Name</label>
@@ -91,7 +91,8 @@ export default function TemplateForm({
           <textarea
             required
             rows="7"
-            className="input-field resize-none bg-gray-800/50 focus:bg-gray-800 transition-colors leading-relaxed"
+            className="input-field resize-none bg-gray-800/50 focus:bg-gray-800 transition-colors leading-relaxed [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-500"
+            style={{ scrollbarWidth: 'thin', scrollbarColor: '#4b5563 transparent' }}
             value={formData.content}
             onChange={(e) => setFormData({...formData, content: e.target.value})}
             placeholder="Hi {name}, ..."

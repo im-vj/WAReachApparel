@@ -67,23 +67,23 @@ export default function LogTab() {
 
       <div className="table-container max-h-[calc(100vh-12rem)]">
         <table className="min-w-full divide-y divide-gray-700">
-          <thead className="table-header sticky top-0 bg-gray-800 z-10">
+          <thead className="bg-gray-900/80 sticky top-0 z-10 backdrop-blur-sm">
             <tr>
-              <th className="px-6 py-3">Date/Time</th>
-              <th className="px-6 py-3">Contact</th>
-              <th className="px-6 py-3">Phone</th>
-              <th className="px-6 py-3">Message Snippet</th>
-              <th className="px-6 py-3">Status</th>
+              <th className="table-header">Date/Time</th>
+              <th className="table-header">Contact</th>
+              <th className="table-header">Phone</th>
+              <th className="table-header">Message Snippet</th>
+              <th className="table-header">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800">
+          <tbody className="divide-y divide-gray-800/50">
             {loading ? (
               <tr><td colSpan="5" className="text-center py-8 text-gray-400">Loading logs...</td></tr>
             ) : logs.length === 0 ? (
               <tr><td colSpan="5" className="text-center py-8 text-gray-400">No send history found.</td></tr>
             ) : (
               logs.map(log => (
-                <tr key={log.id} className="hover:bg-gray-800/50 transition-colors">
+                <tr key={log.id} className="group hover:bg-gray-800/40 transition-colors">
                   <td className="table-cell text-gray-400 whitespace-nowrap">
                     {log.sentAt ? new Date(log.sentAt).toLocaleString() : 'N/A'}
                   </td>

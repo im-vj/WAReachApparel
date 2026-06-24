@@ -127,12 +127,12 @@ export default function ContactsTab() {
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-gray-400 text-sm">Filter:</span>
+        <div className="flex items-center gap-3">
+          <span className="text-gray-400 text-sm font-medium">Filter:</span>
           <select 
             value={filter} 
             onChange={(e) => setFilter(e.target.value)}
-            className="bg-surface-dark border border-gray-600 rounded-md px-3 py-1.5 text-sm text-white focus:outline-none"
+            className="input-field py-1.5 w-40 text-sm shadow-none"
           >
             <option value="ALL">All Statuses</option>
             <option value="PENDING">Pending</option>
@@ -144,13 +144,13 @@ export default function ContactsTab() {
 
       <div className="table-container">
         <table className="min-w-full divide-y divide-gray-700">
-          <thead className="table-header">
+          <thead className="bg-gray-900/80 sticky top-0 z-10 backdrop-blur-sm">
             <tr>
-              <th className="px-6 py-3">ID</th>
-              <th className="px-6 py-3">Display Name</th>
-              <th className="px-6 py-3">Phone</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">Actions</th>
+              <th className="table-header">ID</th>
+              <th className="table-header">Display Name</th>
+              <th className="table-header">Phone</th>
+              <th className="table-header">Status</th>
+              <th className="table-header">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800">
@@ -160,7 +160,7 @@ export default function ContactsTab() {
               <tr><td colSpan="5" className="text-center py-8 text-gray-400">No contacts found.</td></tr>
             ) : (
               filteredContacts.map(contact => (
-                <tr key={contact.id} className="hover:bg-gray-800/50 transition-colors">
+                <tr key={contact.id} className="group hover:bg-gray-800/40 transition-colors">
                   <td className="table-cell text-gray-400">{contact.id}</td>
                   <td className="table-cell font-medium">{contact.displayName || contact.savedName}</td>
                   <td className="table-cell text-gray-300">+{contact.phoneNumber}</td>

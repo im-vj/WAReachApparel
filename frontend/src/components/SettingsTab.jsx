@@ -71,11 +71,11 @@ export default function SettingsTab() {
 
   return (
     <div className="max-w-4xl space-y-8">
-      <div className="card border-primary/20 shadow-primary/5">
-        <h2 className="text-xl font-semibold mb-6 flex items-center">
+      <div className="card">
+        <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 mb-6 flex items-center">
           Meta WhatsApp API Configuration
-          <a href="https://developers.facebook.com/apps" target="_blank" rel="noreferrer" className="ml-4 text-xs font-normal text-primary hover:underline flex items-center">
-            Meta Dashboard <ExternalLink className="w-3 h-3 ml-1" />
+          <a href="https://developers.facebook.com/apps" target="_blank" rel="noreferrer" className="ml-4 text-xs font-normal text-primary hover:text-primary-dark hover:underline flex items-center bg-primary/10 px-2.5 py-1 rounded-full transition-colors">
+            Meta Dashboard <ExternalLink className="w-3 h-3 ml-1.5" />
           </a>
         </h2>
         
@@ -144,11 +144,11 @@ export default function SettingsTab() {
       </div>
 
       <div className="card">
-        <h3 className="text-lg font-medium mb-4 flex items-center">
-          <Activity className="w-5 h-5 mr-2 text-primary" />
+        <h3 className="text-lg font-bold text-gray-200 mb-4 flex items-center">
+          <Activity className="w-5 h-5 mr-2.5 text-primary" />
           Test Connection
         </h3>
-        <p className="text-sm text-gray-400 mb-4">
+        <p className="text-sm text-gray-400 mb-6 leading-relaxed">
           Send a free-text test message to verify your API credentials. The recipient number must have sent a message to your WhatsApp Business number within the last 24 hours to receive free-text messages.
         </p>
         

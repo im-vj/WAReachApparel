@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getSettingsMap } from './settingsService.js';
 
-export const sendMessage = async (phoneNumber, message, isTemplateMode, templateName, templateVar) => {
+export const sendMessage = async (phoneNumber, message, isTemplateMode, templateName, templateVar, documentUrl, documentFilename) => {
   const response = { success: false, messageId: null, error: null, fullResponse: null, isRateLimited: false };
   
   try {
@@ -23,17 +23,43 @@ export const sendMessage = async (phoneNumber, message, isTemplateMode, template
 
     if (isTemplateMode) {
       body.type = 'template';
+      
+      const components = [];
+      if (documentUrl) {
+        components.push({
+          type: 'header',
+          parameters: [{
+            type: 'document',
+            document: { 
+              link: documentUrl,
+              ...(documentFilename && { filename: documentFilename })
+            }
+          }]
+        });
+      }
+      
+      components.push({
+        type: 'body',
+        parameters: [{ type: 'text', text: templateVar || '' }]
+      });
+
       body.template = {
         name: templateName,
         language: { code: 'en' },
-        components: [{
-          type: 'body',
-          parameters: [{ type: 'text', text: templateVar || '' }]
-        }]
+        components: components
       };
     } else {
-      body.type = 'text';
-      body.text = { body: message, preview_url: true };
+      if (documentUrl) {
+        body.type = 'document';
+        body.document = { 
+          link: documentUrl,
+          caption: message,
+          ...(documentFilename && { filename: documentFilename })
+        };
+      } else {
+        body.type = 'text';
+        body.text = { body: message, preview_url: true };
+      }
     }
 
     console.log(`Sending message to ${phoneNumber}:`, JSON.stringify(body));

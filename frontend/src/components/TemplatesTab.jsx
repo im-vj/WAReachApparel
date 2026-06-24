@@ -9,7 +9,7 @@ export default function TemplatesTab() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
   
-  const [formData, setFormData] = useState({ name: '', content: '', metaTemplateName: '' });
+  const [formData, setFormData] = useState({ name: '', content: '', metaTemplateName: '', headerDocumentUrl: '', headerDocumentFilename: '' });
 
   // Confirmation Modal State
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -31,10 +31,16 @@ export default function TemplatesTab() {
   const openModal = (template = null) => {
     if (template) {
       setEditingTemplate(template);
-      setFormData({ name: template.name, content: template.content, metaTemplateName: template.metaTemplateName || '' });
+      setFormData({ 
+        name: template.name, 
+        content: template.content, 
+        metaTemplateName: template.metaTemplateName || '',
+        headerDocumentUrl: template.headerDocumentUrl || '',
+        headerDocumentFilename: template.headerDocumentFilename || ''
+      });
     } else {
       setEditingTemplate(null);
-      setFormData({ name: '', content: '', metaTemplateName: '' });
+      setFormData({ name: '', content: '', metaTemplateName: '', headerDocumentUrl: '', headerDocumentFilename: '' });
     }
     setIsModalOpen(true);
   };
@@ -116,6 +122,12 @@ export default function TemplatesTab() {
                 Meta Template: {template.metaTemplateName}
               </div>
             )}
+            {template.headerDocumentUrl && (
+              <div className="mb-3 text-xs bg-blue-900/50 px-2 py-1 rounded flex items-center text-blue-300 w-max border border-blue-800/50">
+                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                PDF Attached
+              </div>
+            )}
             <div className="bg-gray-800/50 rounded p-4 text-sm text-gray-300 flex-1 whitespace-pre-wrap overflow-hidden" style={{ maxHeight: '200px' }}>
               {template.content}
             </div>
@@ -157,6 +169,32 @@ export default function TemplatesTab() {
                     value={formData.metaTemplateName}
                     onChange={(e) => setFormData({...formData, metaTemplateName: e.target.value})}
                     placeholder="e.g. cordestitch_outreach"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Header Document URL (Optional)
+                    <span className="block text-xs text-gray-500 font-normal">Direct link to a PDF to include as a header.</span>
+                  </label>
+                  <input
+                    type="url"
+                    className="input-field"
+                    value={formData.headerDocumentUrl}
+                    onChange={(e) => setFormData({...formData, headerDocumentUrl: e.target.value})}
+                    placeholder="https://example.com/brochure.pdf"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Document Filename (Optional)
+                    <span className="block text-xs text-gray-500 font-normal">The name of the file shown in WhatsApp.</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="input-field"
+                    value={formData.headerDocumentFilename}
+                    onChange={(e) => setFormData({...formData, headerDocumentFilename: e.target.value})}
+                    placeholder="e.g. Company_Brochure.pdf"
                   />
                 </div>
                 <div>

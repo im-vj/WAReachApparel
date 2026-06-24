@@ -23,12 +23,14 @@ model Contact {
 }
 
 model MessageTemplate {
-  id               Int       @id @default(autoincrement())
-  name             String    @unique
-  content          String
-  metaTemplateName String?
+  id                     Int       @id @default(autoincrement())
+  name                   String    @unique
+  content                String
+  metaTemplateName       String?
+  headerDocumentUrl      String?
+  headerDocumentFilename String?
 
-  sendLogs         SendLog[]
+  sendLogs               SendLog[]
 }
 
 model SendLog {

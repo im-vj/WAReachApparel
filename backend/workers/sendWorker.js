@@ -22,7 +22,13 @@ const sendWorker = new Worker('SendMessages', async (job) => {
     const contact = await prisma.contact.findUnique({ where: { id: Number(contactId) } });
     if (!contact) continue;
 
-    const renderedMessage = template.content.replace(/\{name\}/g, contact.displayName || '');
+    const formatName = (name) => {
+      if (!name) return '';
+      return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+    };
+    
+    const formattedName = formatName(contact.displayName);
+    const renderedMessage = template.content.replace(/\{name\}/g, formattedName);
     
     await job.updateProgress({
       total, sent, failed,
@@ -34,7 +40,9 @@ const sendWorker = new Worker('SendMessages', async (job) => {
       renderedMessage,
       isTemplateMode,
       template.metaTemplateName,
-      contact.displayName
+      formattedName,
+      template.headerDocumentUrl,
+      template.headerDocumentFilename
     );
 
     if (!waRes.success && waRes.isRateLimited) {
@@ -48,7 +56,9 @@ const sendWorker = new Worker('SendMessages', async (job) => {
         renderedMessage,
         isTemplateMode,
         template.metaTemplateName,
-        contact.displayName
+        formattedName,
+        template.headerDocumentUrl,
+        template.headerDocumentFilename
       );
     }
 

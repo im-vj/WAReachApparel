@@ -24,6 +24,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+// Trust the first proxy (e.g. Nginx, Heroku, etc.) to fix express-rate-limit X-Forwarded-For error
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(cors());
 app.use(express.json());

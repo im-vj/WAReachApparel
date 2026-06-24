@@ -292,7 +292,20 @@ export default function TemplatesTab() {
                 </button>
               </div>
               <h4 className="text-sm font-medium text-gray-400 mb-4 uppercase tracking-wider">Live Preview</h4>
-              <div className="flex-1 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-cover rounded-lg p-4 flex flex-col border border-gray-800">
+              <div className="flex-1 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-cover rounded-lg p-4 flex flex-col border border-gray-800 space-y-2">
+                
+                {formData.headerDocumentUrl && (
+                  <div className="bg-white text-gray-800 rounded-lg rounded-tl-none p-3 shadow-sm max-w-[85%] self-start text-sm flex items-center gap-3">
+                    <div className="bg-red-100 text-red-600 p-2 rounded flex-shrink-0">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="font-medium truncate">{formData.headerDocumentFilename || 'Document.pdf'}</p>
+                      <p className="text-xs text-gray-500 uppercase">PDF • {formData.headerDocumentUrl.length > 25 ? '...' + formData.headerDocumentUrl.slice(-20) : 'Attached'}</p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="bg-white text-gray-800 rounded-lg rounded-tl-none p-3 shadow-sm max-w-[85%] self-start text-sm whitespace-pre-wrap">
                      {formData.content ? renderPreview(formData.content) : <span className="text-gray-400 italic">Message preview will appear here...</span>}
                 </div>

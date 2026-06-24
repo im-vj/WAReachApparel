@@ -24,9 +24,11 @@ services:
       WHATSAPP_API_VERSION: ${WHATSAPP_API_VERSION:-v25.0}
       DATABASE_URL: ${DATABASE_URL:-postgresql://wareach_secure_user:password@wareach_db:5432/wareach_production?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://wareach_redis:6379}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
     restart: unless-stopped
-    volumes:
-      - wareach_uploads:/app/uploads
     depends_on:
       - wareach_db
       - wareach_redis
@@ -45,4 +47,3 @@ services:
 
 volumes:
   pgdata:
-  wareach_uploads:

@@ -17,7 +17,7 @@ export default function TemplateModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4 sm:p-6 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6 animate-in fade-in duration-200">
       <div className="bg-surface-dark border border-gray-700/60 rounded-2xl shadow-2xl w-full max-w-5xl flex flex-col md:flex-row overflow-hidden transform transition-all animate-in zoom-in-95 duration-200 max-h-[90vh]">
         
         {/* Form Side */}

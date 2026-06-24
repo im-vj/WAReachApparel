@@ -31,6 +31,11 @@ export default function LivePreview({ formData }) {
       )}
 
       <div className="bg-white text-gray-800 rounded-xl rounded-tl-none p-4 shadow-sm max-w-[85%] self-start text-[14.5px] leading-snug whitespace-pre-wrap relative z-10 animate-in slide-in-from-bottom-2">
+        {/* WhatsApp Tail */}
+        <svg viewBox="0 0 8 13" width="8" height="13" className="absolute top-0 -left-2 text-white fill-current drop-shadow-sm">
+          <path d="M5.188 1H0v11.142l4.969-5.063A2 2 0 0 0 5.188 1z" />
+        </svg>
+
         {formData.content ? (
           <span className="text-gray-900">{renderPreview(formData.content)}</span>
         ) : (

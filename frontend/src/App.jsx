@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Users, FileText, Send, History, Settings, MessageSquare, Menu, X, LogOut, User } from 'lucide-react';
+import { Users, FileText, Send, History, Settings, MessageSquare, Menu, X, LogOut, User, Workflow } from 'lucide-react';
 import ContactsTab from './components/ContactsTab';
 import TemplatesTab from './components/TemplatesTab';
 import SendTab from './components/SendTab';
 import LogTab from './components/LogTab';
 import SettingsTab from './components/SettingsTab';
+import PipelinesTab from './components/PipelinesTab';
 import Login from './components/Login';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -32,7 +33,8 @@ function App() {
   const tabs = [
     { id: 'contacts', name: 'Contacts', icon: Users },
     { id: 'templates', name: 'Templates', icon: FileText },
-    { id: 'send', name: 'Send Messages', icon: Send },
+    { id: 'send', name: 'Broadcast', icon: Send },
+    { id: 'pipelines', name: 'Pipelines', icon: Workflow },
     { id: 'log', name: 'Send Log', icon: History },
     { id: 'settings', name: 'Settings', icon: Settings },
   ];
@@ -42,6 +44,7 @@ function App() {
       case 'contacts': return <ContactsTab />;
       case 'templates': return <TemplatesTab />;
       case 'send': return <SendTab />;
+      case 'pipelines': return <PipelinesTab />;
       case 'log': return <LogTab />;
       case 'settings': return <SettingsTab />;
       default: return <ContactsTab />;

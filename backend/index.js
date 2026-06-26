@@ -72,6 +72,10 @@ app.use((req, res, next) => {
   next();
 });
 
+import pipelineRoutes from './routes/pipelineRoutes.js';
+import { startPipelineDaemon } from './workers/pipelineWorker.js';
+import { execSync } from 'child_process';
+
 app.use('/api/auth', authRoutes);
 app.use('/api/contacts', authMiddleware, contactRoutes);
 app.use('/api/templates', authMiddleware, templateRoutes);
@@ -79,6 +83,7 @@ app.use('/api/send', authMiddleware, sendRoutes);
 app.use('/api/log', authMiddleware, logRoutes);
 app.use('/api/settings', authMiddleware, settingsRoutes);
 app.use('/api/upload', authMiddleware, uploadRoutes);
+app.use('/api/pipelines', authMiddleware, pipelineRoutes);
 
 // Serve uploads folder statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -91,12 +96,19 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Initialize DB defaults
+// Initialize DB defaults and start automation loop
 const init = async () => {
   try {
+    try {
+      logger.info('Database', 'Synchronizing Prisma schema...');
+      execSync('npx prisma db push --accept-data-loss', { stdio: 'ignore' });
+    } catch (e) {
+      logger.warn('Database', 'Prisma auto-push skipped (or not connected locally). Will rely on existing tables.');
+    }
     await initSettings();
     await initTemplates();
-    logger.info('Server', 'Database defaults initialized.');
+    startPipelineDaemon();
+    logger.info('Server', 'Database defaults and automation daemon active.');
   } catch (err) {
     logger.error('Server', 'Failed to initialize database defaults:', err);
   }

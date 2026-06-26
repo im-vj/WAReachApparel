@@ -51,3 +51,22 @@ model AppSetting {
   key   String @id
   value String
 }
+
+model Pipeline {
+  id           Int       @id @default(autoincrement())
+  name         String    @unique
+  description  String?
+  isActive     Boolean   @default(true)
+  triggerType  String    // INTERVAL, DAILY_TIME
+  intervalMins Int?      // e.g. 60
+  dailyTime    String?   // e.g. "10:00"
+  targetStatus String    @default("PENDING") // PENDING, FAILED, ALL
+  templateId   Int
+  batchSize    Int       @default(50)
+  delayMs      Int       @default(2000)
+  lastRunAt    DateTime?
+  nextRunAt    DateTime?
+  totalRuns    Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}

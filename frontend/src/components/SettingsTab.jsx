@@ -15,6 +15,7 @@ export default function SettingsTab() {
   });
   const [loading, setLoading] = useState(false);
   const [showToken, setShowToken] = useState(false);
+  const [showAdminPass, setShowAdminPass] = useState(false);
 
   const [testPhone, setTestPhone] = useState('');
   const [testing, setTesting] = useState(false);
@@ -223,14 +224,20 @@ export default function SettingsTab() {
               <label className="block text-sm font-medium text-gray-300 mb-1">Admin Password</label>
               <div className="relative">
                 <input
-                  type="text"
-                  className="input-field pr-10 font-mono"
+                  type={showAdminPass ? "text" : "password"}
+                  className="input-field pr-20 font-mono text-sm tracking-widest"
                   value={settings['auth.admin-password'] || ''}
                   onChange={(e) => setSettings({ ...settings, 'auth.admin-password': e.target.value })}
-                  placeholder="Password"
+                  placeholder="••••••••"
                   required
                 />
-                <Lock className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <button
+                  type="button"
+                  onClick={() => setShowAdminPass(!showAdminPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-emerald-400 font-semibold hover:text-emerald-300 transition-colors"
+                >
+                  {showAdminPass ? 'HIDE' : 'SHOW'}
+                </button>
               </div>
             </div>
           </div>

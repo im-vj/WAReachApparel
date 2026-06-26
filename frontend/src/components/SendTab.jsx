@@ -10,7 +10,7 @@ export default function SendTab() {
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [delayMs, setDelayMs] = useState(3000);
   const [isTemplateMode, setIsTemplateMode] = useState(true);
-  const [customParams, setCustomParams] = useState('');
+  const [paramValues, setParamValues] = useState({});
   
   const [sending, setSending] = useState(false);
   const [progress, setProgress] = useState(null);
@@ -58,12 +58,21 @@ export default function SendTab() {
       setProgress({ total: selectedContacts.size, sent: 0, failed: 0 });
       toast('Campaign started!', { icon: '🚀' });
 
+      // Convert paramValues { 2: "val2", 3: "val3" } into array for worker
+      const selectedTpl = templates.find(t => t.id.toString() === selectedTemplateId);
+      const matches = selectedTpl ? [...(selectedTpl.content.matchAll(/\{\{(\d+)\}\}/g))].map(m => parseInt(m[1])) : [];
+      const maxIdx = matches.length > 0 ? Math.max(...matches) : 0;
+      const customParamsList = [];
+      for (let p = 2; p <= maxIdx; p++) {
+        customParamsList.push(paramValues[p] || '');
+      }
+
       const res = await api.post('/send', {
         templateId: parseInt(selectedTemplateId),
         contactIds: Array.from(selectedContacts),
         delayMs,
         isTemplateMode,
-        customParams
+        customParams: customParamsList
       });
 
       const { clientId } = res.data;
@@ -114,14 +123,16 @@ export default function SendTab() {
     ? contacts.find(c => c.id === Array.from(selectedContacts)[0])?.displayName 
     : 'John Doe';
 
+  // Calculate max parameter count required by selectedTemplate
+  const matches = selectedTemplate ? [...(selectedTemplate.content.matchAll(/\{\{(\d+)\}\}/g))].map(m => parseInt(m[1])) : [];
+  const maxParamIndex = matches.length > 0 ? Math.max(...matches) : (/\{name\}/i.test(selectedTemplate?.content || '') ? 1 : 0);
+
   const getPreviewText = () => {
     if (!selectedTemplate) return '';
     let text = selectedTemplate.content.replace(/\{name\}|\{\{1\}\}/gi, previewName);
-    if (customParams) {
-      const list = customParams.split(',').map(s => s.trim());
-      list.forEach((val, idx) => {
-        text = text.replace(new RegExp(`\\{\\{${idx + 2}\\}\\}`, 'g'), val);
-      });
+    for (let p = 2; p <= maxParamIndex; p++) {
+      const val = paramValues[p] || `{{${p}}}`;
+      text = text.replace(new RegExp(`\\{\\{${p}\\}\\}`, 'g'), val);
     }
     return text;
   };
@@ -180,20 +191,32 @@ export default function SendTab() {
               </select>
             </div>
 
-            {isTemplateMode && (
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Additional Template Parameters <span className="text-gray-500 font-normal text-xs">(comma-separated for {'{{2}}, {{3}}'}, etc.)</span>
-                </label>
-                <input 
-                  type="text" 
-                  className="input-field"
-                  value={customParams}
-                  onChange={(e) => setCustomParams(e.target.value)}
-                  placeholder="e.g. #ORD-1042, Friday 5 PM"
-                  disabled={sending}
-                />
-                <p className="text-[11px] text-gray-500 mt-1 font-mono">{'{{1}}'} automatically uses contact Name.</p>
+            {isTemplateMode && selectedTemplate && (
+              <div className="space-y-3 pt-2 border-t border-gray-800 animate-in fade-in">
+                <div className="text-xs text-gray-400 font-medium tracking-wide uppercase">Template Parameter Options:</div>
+                <div className="bg-gray-800/60 p-3 rounded-lg border border-gray-700/60 text-xs text-primary flex items-center justify-between font-mono">
+                  <span>{'{{1}}'} (Recipient Name)</span>
+                  <span className="text-gray-400 italic font-sans text-[11px]">Auto-bound to contact Name</span>
+                </div>
+                {maxParamIndex >= 2 ? (
+                  Array.from({ length: maxParamIndex - 1 }, (_, i) => i + 2).map(num => (
+                    <div key={num}>
+                      <label className="block text-xs font-medium text-gray-300 mb-1 font-mono">
+                        Parameter {'{{' + num + '}}'} Value
+                      </label>
+                      <input 
+                        type="text" 
+                        className="input-field py-2 text-sm font-sans"
+                        value={paramValues[num] || ''}
+                        onChange={(e) => setParamValues({ ...paramValues, [num]: e.target.value })}
+                        placeholder={`Enter value for {{${num}}}`}
+                        disabled={sending}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-xs text-gray-500 italic">No additional parameters ({'{{2}}'}, {'{{3}}'}, etc.) required for this template.</div>
+                )}
               </div>
             )}
 

@@ -242,38 +242,47 @@ export default function SendTab() {
         </div>
 
         <div className="card">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium">Select Contacts ({selectedContacts.size} selected)</h3>
-            <div className="flex gap-2">
-              <button onClick={selectAllPending} className="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded transition-colors disabled:opacity-50" disabled={sending}>Pending Only</button>
-              <button onClick={selectAll} className="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded transition-colors disabled:opacity-50" disabled={sending}>Select All</button>
-              <button onClick={deselectAll} className="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded transition-colors disabled:opacity-50" disabled={sending}>Deselect All</button>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5 pb-4 border-b border-gray-800/80">
+            <div>
+              <h3 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-200 flex items-center">
+                Select Recipients
+                <span className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 font-mono font-semibold text-xs px-2.5 py-0.5 rounded-full ml-3">
+                  {selectedContacts.size} selected
+                </span>
+              </h3>
+              <p className="text-xs text-gray-400 mt-1">Choose which contacts will receive this WhatsApp campaign.</p>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <button onClick={selectAllPending} className="btn-secondary text-xs px-3 py-2 grow sm:grow-0 justify-center flex items-center" disabled={sending}>Pending Only</button>
+              <button onClick={selectAll} className="btn-secondary text-xs px-3 py-2 grow sm:grow-0 justify-center flex items-center" disabled={sending}>Select All</button>
+              <button onClick={deselectAll} className="btn-secondary text-xs px-3 py-2 grow sm:grow-0 justify-center flex items-center" disabled={sending}>Deselect All</button>
             </div>
           </div>
           
           <div className="table-container max-h-96 overflow-y-auto">
-            <table className="min-w-full divide-y divide-gray-800/50">
-              <thead className="bg-gray-900/80 sticky top-0 z-10 backdrop-blur-sm">
+            <table className="min-w-full divide-y divide-gray-800/80">
+              <thead className="bg-gray-950/90 sticky top-0 z-10 backdrop-blur-md">
                 <tr>
-                  <th className="px-6 py-4 text-left w-10"></th>
-                  <th className="table-header">Name</th>
-                  <th className="table-header">Phone</th>
-                  <th className="table-header">Status</th>
+                  <th className="px-4 sm:px-6 py-3.5 text-left w-10"></th>
+                  <th className="px-4 sm:px-6 py-3.5 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Name</th>
+                  <th className="px-4 sm:px-6 py-3.5 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Phone</th>
+                  <th className="px-4 sm:px-6 py-3.5 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800/50 bg-surface-dark">
+              <tbody className="divide-y divide-gray-800/50 bg-gray-900/40">
                 {contacts.map(contact => (
-                  <tr key={contact.id} className="hover:bg-gray-800/40 cursor-pointer transition-colors group" onClick={() => !sending && toggleContact(contact.id)}>
-                    <td className="table-cell">
+                  <tr key={contact.id} className="hover:bg-gray-800/50 cursor-pointer transition-colors group" onClick={() => !sending && toggleContact(contact.id)}>
+                    <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap">
                       {selectedContacts.has(contact.id) ? 
-                        <CheckSquare className="w-5 h-5 text-primary transition-transform group-hover:scale-110" /> : 
-                        <Square className="w-5 h-5 text-gray-500 transition-transform group-hover:scale-110" />
+                        <CheckSquare className="w-5 h-5 text-emerald-400 transition-transform group-hover:scale-110" /> : 
+                        <Square className="w-5 h-5 text-gray-600 transition-transform group-hover:scale-110" />
                       }
                     </td>
-                    <td className="table-cell font-medium">{contact.displayName || contact.savedName}</td>
-                    <td className="table-cell text-gray-400">+{contact.phoneNumber}</td>
-                    <td className="table-cell">
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${contact.status === 'SENT' ? 'bg-green-500/10 text-green-400 border-green-500/20' : contact.status === 'FAILED' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                    <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap text-sm font-semibold text-gray-200">{contact.displayName || contact.savedName}</td>
+                    <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap text-xs font-mono text-gray-400">+{contact.phoneNumber}</td>
+                    <td className="px-4 sm:px-6 py-3.5 whitespace-nowrap">
+                      <span className={`px-2.5 py-1 rounded-md text-xs font-medium border inline-block ${contact.status === 'SENT' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : contact.status === 'FAILED' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-gray-800/80 text-gray-400 border-gray-700'}`}>
                         {contact.status}
                       </span>
                     </td>

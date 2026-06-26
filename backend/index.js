@@ -10,6 +10,8 @@ import { initSettings } from './services/settingsService.js';
 import { initTemplates } from './services/templateService.js';
 import './workers/sendWorker.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import { authMiddleware } from './middleware/authMiddleware.js';
 import { logger } from './utils/logger.js';
 
 import path from 'path';
@@ -63,12 +65,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/contacts', contactRoutes);
-app.use('/api/templates', templateRoutes);
-app.use('/api/send', sendRoutes);
-app.use('/api/log', logRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/upload', uploadRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/contacts', authMiddleware, contactRoutes);
+app.use('/api/templates', authMiddleware, templateRoutes);
+app.use('/api/send', authMiddleware, sendRoutes);
+app.use('/api/log', authMiddleware, logRoutes);
+app.use('/api/settings', authMiddleware, settingsRoutes);
+app.use('/api/upload', authMiddleware, uploadRoutes);
 
 // Serve uploads folder statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, ExternalLink, Activity } from 'lucide-react';
+import { Save, ExternalLink, Activity, ShieldCheck, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 
@@ -9,11 +9,13 @@ export default function SettingsTab() {
     'whatsapp.business-account-id': '',
     'whatsapp.access-token': '',
     'whatsapp.api-version': 'v25.0',
-    'whatsapp.template-language': 'en'
+    'whatsapp.template-language': 'en_US',
+    'auth.admin-email': '',
+    'auth.admin-password': ''
   });
   const [loading, setLoading] = useState(false);
   const [showToken, setShowToken] = useState(false);
-  
+
   const [testPhone, setTestPhone] = useState('');
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
@@ -34,7 +36,7 @@ export default function SettingsTab() {
   const handleSave = async (e) => {
     e.preventDefault();
     const savePromise = api.post('/settings', settings);
-    
+
     toast.promise(savePromise, {
       loading: 'Saving settings...',
       success: 'Settings saved! Backend will use these immediately.',
@@ -56,7 +58,7 @@ export default function SettingsTab() {
       toast.error('Please enter a phone number to test');
       return;
     }
-    
+
     try {
       setTesting(true);
       setTestResult(null);
@@ -79,7 +81,7 @@ export default function SettingsTab() {
             Meta Dashboard <ExternalLink className="w-3 h-3 ml-1.5" />
           </a>
         </h2>
-        
+
         <form onSubmit={handleSave} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
@@ -88,7 +90,7 @@ export default function SettingsTab() {
                 type="text"
                 className="input-field"
                 value={settings['whatsapp.phone-number-id']}
-                onChange={(e) => setSettings({...settings, 'whatsapp.phone-number-id': e.target.value})}
+                onChange={(e) => setSettings({ ...settings, 'whatsapp.phone-number-id': e.target.value })}
                 placeholder="101xxxxxxxx"
               />
             </div>
@@ -98,12 +100,12 @@ export default function SettingsTab() {
                 type="text"
                 className="input-field"
                 value={settings['whatsapp.business-account-id']}
-                onChange={(e) => setSettings({...settings, 'whatsapp.business-account-id': e.target.value})}
+                onChange={(e) => setSettings({ ...settings, 'whatsapp.business-account-id': e.target.value })}
                 placeholder="112xxxxxxxx"
               />
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-1">Permanent Access Token</label>
             <div className="relative">
@@ -111,11 +113,11 @@ export default function SettingsTab() {
                 type={showToken ? "text" : "password"}
                 className="input-field pr-20 font-mono text-sm"
                 value={settings['whatsapp.access-token']}
-                onChange={(e) => setSettings({...settings, 'whatsapp.access-token': e.target.value})}
+                onChange={(e) => setSettings({ ...settings, 'whatsapp.access-token': e.target.value })}
                 placeholder="EAAL..."
               />
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setShowToken(!showToken)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-primary font-medium hover:text-primary-dark"
               >
@@ -131,7 +133,7 @@ export default function SettingsTab() {
                 type="text"
                 className="input-field"
                 value={settings['whatsapp.api-version'] || 'v25.0'}
-                onChange={(e) => setSettings({...settings, 'whatsapp.api-version': e.target.value})}
+                onChange={(e) => setSettings({ ...settings, 'whatsapp.api-version': e.target.value })}
                 placeholder="v25.0"
               />
             </div>
@@ -141,7 +143,7 @@ export default function SettingsTab() {
                 type="text"
                 className="input-field"
                 value={settings['whatsapp.template-language'] || 'en'}
-                onChange={(e) => setSettings({...settings, 'whatsapp.template-language': e.target.value})}
+                onChange={(e) => setSettings({ ...settings, 'whatsapp.template-language': e.target.value })}
                 placeholder="en (or en_US, en_GB, es)"
               />
             </div>
@@ -164,7 +166,7 @@ export default function SettingsTab() {
         <p className="text-sm text-gray-400 mb-6 leading-relaxed">
           Send a free-text test message to verify your API credentials. The recipient number must have sent a message to your WhatsApp Business number within the last 24 hours to receive free-text messages.
         </p>
-        
+
         <div className="flex gap-3 max-w-md">
           <input
             type="text"
@@ -173,7 +175,7 @@ export default function SettingsTab() {
             value={testPhone}
             onChange={(e) => setTestPhone(e.target.value)}
           />
-          <button 
+          <button
             onClick={handleTestConnection}
             disabled={testing}
             className="btn-secondary whitespace-nowrap"
@@ -192,6 +194,54 @@ export default function SettingsTab() {
             </pre>
           </div>
         )}
+      </div>
+
+      {/* Admin Security Settings Card */}
+      <div className="card border-emerald-500/30">
+        <h3 className="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 text-emerald-400" />
+          Portal Security & Admin Credentials
+        </h3>
+        <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+          Update the login credentials used to access this enterprise dashboard. Changing these credentials takes effect immediately across all active browser sessions.
+        </p>
+
+        <form onSubmit={handleSave} className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Admin Email</label>
+              <input
+                type="email"
+                className="input-field"
+                value={settings['auth.admin-email'] || ''}
+                onChange={(e) => setSettings({ ...settings, 'auth.admin-email': e.target.value })}
+                placeholder="admin@company.com"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Admin Password</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  className="input-field pr-10 font-mono"
+                  value={settings['auth.admin-password'] || ''}
+                  onChange={(e) => setSettings({ ...settings, 'auth.admin-password': e.target.value })}
+                  placeholder="Password"
+                  required
+                />
+                <Lock className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-800 flex justify-end">
+            <button type="submit" className="btn-primary flex items-center text-sm" disabled={loading}>
+              <Save className="w-4 h-4 mr-2" />
+              Update Admin Credentials
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

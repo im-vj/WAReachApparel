@@ -100,7 +100,7 @@ export default function ContactsTab() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-900/40 p-4 rounded-2xl border border-gray-800/80 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/[0.02] p-4 rounded-2xl border border-white/[0.06] backdrop-blur-md">
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <input
             type="file"
@@ -128,11 +128,11 @@ export default function ContactsTab() {
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">Filter:</span>
+          <span className="text-zinc-400 text-[11px] font-mono uppercase tracking-wider">Filter:</span>
           <select 
             value={filter} 
             onChange={(e) => setFilter(e.target.value)}
-            className="input-field py-2 w-full sm:w-44 text-sm shadow-sm"
+            className="input-field py-2 w-full sm:w-44 text-xs shadow-sm"
           >
             <option value="ALL">All Statuses</option>
             <option value="PENDING">Pending Only</option>
@@ -143,8 +143,8 @@ export default function ContactsTab() {
       </div>
 
       <div className="table-container">
-        <table className="min-w-full divide-y divide-gray-700">
-          <thead className="bg-gray-900/80 sticky top-0 z-10 backdrop-blur-sm">
+        <table className="min-w-full divide-y divide-white/[0.06]">
+          <thead className="bg-[#08090d] sticky top-0 z-10">
             <tr>
               <th className="table-header">ID</th>
               <th className="table-header">Display Name</th>
@@ -153,23 +153,23 @@ export default function ContactsTab() {
               <th className="table-header">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800">
+          <tbody className="divide-y divide-white/[0.04]">
             {loading ? (
-              <tr><td colSpan="5" className="text-center py-8 text-gray-400">Loading contacts...</td></tr>
+              <tr><td colSpan="5" className="text-center py-8 text-zinc-500 font-mono text-xs">Loading contacts...</td></tr>
             ) : filteredContacts.length === 0 ? (
-              <tr><td colSpan="5" className="text-center py-8 text-gray-400">No contacts found.</td></tr>
+              <tr><td colSpan="5" className="text-center py-8 text-zinc-500 font-mono text-xs">No contacts found.</td></tr>
             ) : (
               filteredContacts.map(contact => (
-                <tr key={contact.id} className="group hover:bg-gray-800/40 transition-colors">
-                  <td className="table-cell text-gray-400">{contact.id}</td>
-                  <td className="table-cell font-medium">{contact.displayName || contact.savedName}</td>
-                  <td className="table-cell text-gray-300">+{contact.phoneNumber}</td>
+                <tr key={contact.id} className="group hover:bg-white/[0.025] transition-colors">
+                  <td className="table-cell text-zinc-500 font-mono text-xs">{contact.id}</td>
+                  <td className="table-cell font-medium text-white">{contact.displayName || contact.savedName}</td>
+                  <td className="table-cell text-zinc-300 font-mono text-xs">+{contact.phoneNumber}</td>
                   <td className="table-cell">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(contact.status)}`}>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium border border-white/5 ${getStatusColor(contact.status)}`}>
                       {contact.status}
                     </span>
                     {contact.errorMessage && (
-                      <p className="text-xs text-red-400 mt-1 truncate max-w-xs" title={contact.errorMessage}>
+                      <p className="text-xs text-rose-400 mt-1 truncate max-w-xs" title={contact.errorMessage}>
                         {contact.errorMessage}
                       </p>
                     )}
@@ -177,7 +177,7 @@ export default function ContactsTab() {
                   <td className="table-cell">
                     <button 
                       onClick={() => requestDelete(contact.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded transition-colors"
+                      className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-white/[0.05] rounded-lg transition-colors"
                       title="Delete Contact"
                     >
                       <Trash2 className="w-4 h-4" />

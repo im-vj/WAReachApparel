@@ -2,44 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-[#0a0b10] text-zinc-100 font-sans antialiased selection:bg-emerald-500/25 selection:text-emerald-300 overflow-x-hidden;
+  }
+}
+
 @layer components {
   .btn-primary {
-    @apply px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5 border border-emerald-400/20 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
+    @apply relative inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gradient-to-b from-emerald-500 to-emerald-600 text-white font-semibold text-sm shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_4px_12px_rgba(16,185,129,0.2)] hover:from-emerald-400 hover:to-emerald-500 hover:shadow-[0_1px_0_rgba(255,255,255,0.3)_inset,0_6px_16px_rgba(16,185,129,0.3)] active:scale-[0.985] transition-all duration-150 border border-emerald-400/20 disabled:opacity-50 disabled:pointer-events-none disabled:transform-none disabled:shadow-none tracking-tight;
   }
   
   .btn-secondary {
-    @apply px-4 py-2.5 bg-gray-800/80 hover:bg-gray-700/80 text-gray-200 rounded-xl font-medium transition-all duration-300 shadow-md hover:shadow-gray-900/50 hover:-translate-y-0.5 border border-gray-700/80 active:translate-y-0 backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+    @apply relative inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 font-medium text-sm border border-white/[0.09] hover:border-white/[0.16] shadow-sm active:scale-[0.985] transition-all duration-150 backdrop-blur-md disabled:opacity-40 disabled:pointer-events-none tracking-tight;
   }
 
   .btn-danger {
-    @apply px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white rounded-xl font-medium transition-all duration-300 shadow-sm border border-rose-500/30 hover:shadow-rose-500/20 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply relative inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white font-medium text-sm border border-rose-500/25 hover:border-rose-500 shadow-sm transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none tracking-tight;
   }
   
   .input-field {
-    @apply w-full bg-gray-950/50 border border-gray-800 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/70 hover:border-gray-700 transition-all shadow-inner backdrop-blur-sm;
+    @apply w-full bg-[#06070a] border border-white/[0.08] hover:border-white/[0.14] focus:border-emerald-500/80 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:bg-white/[0.03] focus:ring-4 focus:ring-emerald-500/10 transition-all duration-200 shadow-inner;
   }
   
   .card {
-    @apply bg-gray-900/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-800/80 p-6 sm:p-8 hover:border-gray-700/60 transition-all duration-300 relative overflow-hidden;
+    @apply bg-[#0e0f16]/90 backdrop-blur-2xl rounded-2xl border border-white/[0.07] p-6 sm:p-8 shadow-2xl relative overflow-hidden transition-all duration-300;
   }
 
   .table-container {
-    @apply w-full overflow-x-auto rounded-2xl border border-gray-800/80 bg-gray-900/60 backdrop-blur-xl shadow-2xl;
+    @apply w-full overflow-x-auto rounded-2xl border border-white/[0.07] bg-[#0e0f16]/90 backdrop-blur-2xl shadow-2xl;
   }
 
   .table-header {
-    @apply bg-gray-950/80 text-left text-xs font-bold text-gray-400 uppercase tracking-widest px-6 py-4;
+    @apply bg-[#08090d] text-left text-[11px] font-mono font-semibold text-zinc-400 uppercase tracking-wider px-6 py-4 border-b border-white/[0.06];
   }
 
   .table-cell {
-    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-300 border-b border-gray-800/50 group-hover:bg-gray-800/40 transition-colors;
+    @apply px-6 py-4 whitespace-nowrap text-sm text-zinc-300 border-b border-white/[0.04] transition-colors;
   }
 }
 
 /* Universal Sleek Scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #4b5563 transparent;
+  scrollbar-color: #27272a transparent;
 }
 *::-webkit-scrollbar {
   width: 6px;
@@ -49,9 +55,9 @@
   background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background-color: #374151;
+  background-color: #27272a;
   border-radius: 20px;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background-color: #4b5563;
+  background-color: #3f3f46;
 }

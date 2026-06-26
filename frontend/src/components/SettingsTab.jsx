@@ -8,7 +8,8 @@ export default function SettingsTab() {
     'whatsapp.phone-number-id': '',
     'whatsapp.business-account-id': '',
     'whatsapp.access-token': '',
-    'whatsapp.api-version': 'v25.0'
+    'whatsapp.api-version': 'v25.0',
+    'whatsapp.template-language': 'en'
   });
   const [loading, setLoading] = useState(false);
   const [showToken, setShowToken] = useState(false);
@@ -123,15 +124,27 @@ export default function SettingsTab() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">API Version</label>
-            <input
-              type="text"
-              className="input-field w-32"
-              value={settings['whatsapp.api-version']}
-              onChange={(e) => setSettings({...settings, 'whatsapp.api-version': e.target.value})}
-              placeholder="v25.0"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">API Version</label>
+              <input
+                type="text"
+                className="input-field"
+                value={settings['whatsapp.api-version'] || 'v25.0'}
+                onChange={(e) => setSettings({...settings, 'whatsapp.api-version': e.target.value})}
+                placeholder="v25.0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">Template Language Code</label>
+              <input
+                type="text"
+                className="input-field"
+                value={settings['whatsapp.template-language'] || 'en'}
+                onChange={(e) => setSettings({...settings, 'whatsapp.template-language': e.target.value})}
+                placeholder="en (or en_US, en_GB, es)"
+              />
+            </div>
           </div>
 
           <div className="pt-4 border-t border-gray-800">

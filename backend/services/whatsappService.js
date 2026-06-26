@@ -10,6 +10,7 @@ export const sendMessage = async (phoneNumber, message, isTemplateMode, template
     const phoneId = settings['whatsapp.phone-number-id'] || process.env.WHATSAPP_PHONE_NUMBER_ID;
     const accessToken = settings['whatsapp.access-token'] || process.env.WHATSAPP_ACCESS_TOKEN;
     const apiVersion = settings['whatsapp.api-version'] || process.env.WHATSAPP_API_VERSION || 'v25.0';
+    const langCode = settings['whatsapp.template-language'] || 'en';
     
     if (!phoneId || !accessToken) {
       throw new Error('WhatsApp API credentials are not configured in settings.');
@@ -45,8 +46,8 @@ export const sendMessage = async (phoneNumber, message, isTemplateMode, template
       });
 
       body.template = {
-        name: templateName,
-        language: { code: 'en' },
+        name: templateName ? templateName.trim() : '',
+        language: { code: langCode },
         components: components
       };
     } else {

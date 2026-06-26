@@ -14,7 +14,8 @@ export const initSettings = async () => {
     'whatsapp.phone-number-id',
     'whatsapp.business-account-id',
     'whatsapp.access-token',
-    'whatsapp.api-version'
+    'whatsapp.api-version',
+    'whatsapp.template-language'
   ];
 
   for (const key of DEFAULT_KEYS) {
@@ -22,6 +23,7 @@ export const initSettings = async () => {
     if (!exists) {
       let defaultValue = '';
       if (key === 'whatsapp.api-version') defaultValue = process.env.WHATSAPP_API_VERSION || 'v25.0';
+      if (key === 'whatsapp.template-language') defaultValue = 'en';
       if (key === 'whatsapp.phone-number-id') defaultValue = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
       if (key === 'whatsapp.business-account-id') defaultValue = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || '';
       if (key === 'whatsapp.access-token') defaultValue = process.env.WHATSAPP_ACCESS_TOKEN || '';

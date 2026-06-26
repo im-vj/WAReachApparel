@@ -40,10 +40,15 @@ export const sendMessage = async (phoneNumber, message, isTemplateMode, template
         });
       }
       
-      if (templateVar !== null && templateVar !== undefined && templateVar !== '') {
+      if (Array.isArray(templateVar) && templateVar.length > 0) {
         components.push({
           type: 'body',
-          parameters: [{ type: 'text', text: templateVar }]
+          parameters: templateVar.map(val => ({ type: 'text', text: String(val !== null && val !== undefined ? val : '') }))
+        });
+      } else if (templateVar !== null && templateVar !== undefined && templateVar !== '') {
+        components.push({
+          type: 'body',
+          parameters: [{ type: 'text', text: String(templateVar) }]
         });
       }
 

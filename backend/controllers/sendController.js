@@ -49,7 +49,7 @@ export const streamProgress = async (req, res) => {
 };
 
 export const startSending = async (req, res) => {
-  const { templateId, contactIds, delayMs = 3000, isTemplateMode = false } = req.body;
+  const { templateId, contactIds, delayMs = 3000, isTemplateMode = false, customParams = '' } = req.body;
   const clientId = crypto.randomUUID();
   
   try {
@@ -58,7 +58,8 @@ export const startSending = async (req, res) => {
       templateId,
       contactIds,
       delayMs,
-      isTemplateMode
+      isTemplateMode,
+      customParams
     }, { jobId: clientId });
 
     res.json({ clientId, message: 'Sending started' });

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 import ConfirmModal from './ConfirmModal';
@@ -10,6 +10,7 @@ export default function TemplatesTab() {
   const [templates, setTemplates] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
+  const [syncing, setSyncing] = useState(false);
   
   const [formData, setFormData] = useState({ name: '', content: '', metaTemplateName: '', headerDocumentUrl: '', headerDocumentFilename: '' });
   const [isUploading, setIsUploading] = useState(false);
@@ -29,6 +30,24 @@ export default function TemplatesTab() {
       setTemplates(res.data);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleSyncFromMeta = async () => {
+    try {
+      setSyncing(true);
+      const syncPromise = api.post('/templates/sync');
+      toast.promise(syncPromise, {
+        loading: 'Fetching approved templates from Meta...',
+        success: (res) => `Synced ${res.data.syncedCount} templates from Meta!`,
+        error: (err) => err.response?.data?.error || 'Failed to sync from Meta'
+      });
+      const res = await syncPromise;
+      if (res.data?.templates) setTemplates(res.data.templates);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -144,13 +163,23 @@ export default function TemplatesTab() {
           </h3>
           <p className="text-gray-400 text-sm mt-1">Manage and create rich WhatsApp templates for your outreach.</p>
         </div>
-        <button 
-          onClick={() => openModal()} 
-          className="btn-primary flex items-center shadow-lg hover:shadow-primary/20 transition-all hover:-translate-y-0.5 px-6"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create Template
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleSyncFromMeta} 
+            disabled={syncing}
+            className="btn-secondary flex items-center shadow-lg transition-all hover:-translate-y-0.5 px-5"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing...' : 'Sync from Meta'}
+          </button>
+          <button 
+            onClick={() => openModal()} 
+            className="btn-primary flex items-center shadow-lg hover:shadow-primary/20 transition-all hover:-translate-y-0.5 px-6"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Template
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

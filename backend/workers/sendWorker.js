@@ -9,7 +9,7 @@ import { logger } from '../utils/logger.js';
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const sendWorker = new Worker('SendMessages', async (job) => {
-  const { templateId, contactIds, delayMs, isTemplateMode } = job.data;
+  const { templateId, contactIds, delayMs, isTemplateMode, customParams = '' } = job.data;
   const template = await prisma.messageTemplate.findUnique({ where: { id: Number(templateId) } });
   
   if (!template) {
@@ -32,8 +32,30 @@ const sendWorker = new Worker('SendMessages', async (job) => {
     };
     
     const formattedName = formatName(contact.displayName);
-    const renderedMessage = template.content.replace(/\{name\}/g, formattedName);
-    const hasNameParam = /\{name\}|\{\{\d+\}\}/i.test(template.content || '');
+    const contentStr = template.content || '';
+    const customList = customParams ? (Array.isArray(customParams) ? customParams : String(customParams).split(',').map(s => s.trim())) : [];
+    
+    // Find all {{n}} matches to know max parameter count
+    const matches = [...contentStr.matchAll(/\{\{(\d+)\}\}/g)].map(m => parseInt(m[1]));
+    const maxIndex = matches.length > 0 ? Math.max(...matches) : (/\{name\}/i.test(contentStr) ? 1 : 0);
+
+    let templateParams = null;
+    if (maxIndex > 0 || customList.length > 0) {
+      const totalParams = Math.max(maxIndex, 1 + customList.length);
+      templateParams = [];
+      templateParams.push(formattedName);
+      for (let p = 1; p < totalParams; p++) {
+        templateParams.push(customList[p - 1] || '');
+      }
+    }
+
+    let renderedMessage = contentStr.replace(/\{name\}|\{\{1\}\}/gi, formattedName);
+    if (Array.isArray(templateParams)) {
+      templateParams.forEach((val, idx) => {
+        const reg = new RegExp(`\\{\\{${idx + 1}\\}\\}`, 'g');
+        renderedMessage = renderedMessage.replace(reg, val);
+      });
+    }
     
     await job.updateProgress({
       total, sent, failed,
@@ -70,7 +92,7 @@ const sendWorker = new Worker('SendMessages', async (job) => {
       renderedMessage,
       isTemplateMode,
       template.metaTemplateName,
-      hasNameParam ? formattedName : null,
+      templateParams,
       finalDocumentUrl,
       template.headerDocumentFilename
     );
@@ -86,7 +108,7 @@ const sendWorker = new Worker('SendMessages', async (job) => {
         renderedMessage,
         isTemplateMode,
         template.metaTemplateName,
-        hasNameParam ? formattedName : null,
+        templateParams,
         finalDocumentUrl,
         template.headerDocumentFilename
       );

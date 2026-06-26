@@ -97,7 +97,7 @@ export default function TemplateForm({
             onChange={(e) => setFormData({...formData, content: e.target.value})}
             placeholder="Hi {name}, ..."
           ></textarea>
-          <p className="text-[11px] text-gray-500 mt-1">Use <code className="bg-gray-800 px-1 py-0.5 rounded text-primary">{'{name}'}</code> to personalize with the contact's name.</p>
+          <p className="text-[11px] text-gray-500 mt-1">Use <code className="bg-gray-800 px-1 py-0.5 rounded text-primary">{'{{1}}'}</code> (or <code className="bg-gray-800 px-1 py-0.5 rounded text-primary">{'{name}'}</code>) for Name, and <code className="bg-gray-800 px-1 py-0.5 rounded text-primary">{'{{2}}, {{3}}'}</code> for additional parameters.</p>
         </div>
       </div>
 

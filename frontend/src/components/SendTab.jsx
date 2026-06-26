@@ -10,6 +10,7 @@ export default function SendTab() {
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [delayMs, setDelayMs] = useState(3000);
   const [isTemplateMode, setIsTemplateMode] = useState(true);
+  const [customParams, setCustomParams] = useState('');
   
   const [sending, setSending] = useState(false);
   const [progress, setProgress] = useState(null);
@@ -61,7 +62,8 @@ export default function SendTab() {
         templateId: parseInt(selectedTemplateId),
         contactIds: Array.from(selectedContacts),
         delayMs,
-        isTemplateMode
+        isTemplateMode,
+        customParams
       });
 
       const { clientId } = res.data;
@@ -111,6 +113,18 @@ export default function SendTab() {
   const previewName = selectedContacts.size > 0 
     ? contacts.find(c => c.id === Array.from(selectedContacts)[0])?.displayName 
     : 'John Doe';
+
+  const getPreviewText = () => {
+    if (!selectedTemplate) return '';
+    let text = selectedTemplate.content.replace(/\{name\}|\{\{1\}\}/gi, previewName);
+    if (customParams) {
+      const list = customParams.split(',').map(s => s.trim());
+      list.forEach((val, idx) => {
+        text = text.replace(new RegExp(`\\{\\{${idx + 2}\\}\\}`, 'g'), val);
+      });
+    }
+    return text;
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -165,6 +179,23 @@ export default function SendTab() {
                 ))}
               </select>
             </div>
+
+            {isTemplateMode && (
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Additional Template Parameters <span className="text-gray-500 font-normal text-xs">(comma-separated for {'{{2}}, {{3}}'}, etc.)</span>
+                </label>
+                <input 
+                  type="text" 
+                  className="input-field"
+                  value={customParams}
+                  onChange={(e) => setCustomParams(e.target.value)}
+                  placeholder="e.g. #ORD-1042, Friday 5 PM"
+                  disabled={sending}
+                />
+                <p className="text-[11px] text-gray-500 mt-1 font-mono">{'{{1}}'} automatically uses contact Name.</p>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">Delay Between Messages (ms)</label>
@@ -291,7 +322,7 @@ export default function SendTab() {
                   <svg viewBox="0 0 8 13" width="8" height="13" className="absolute top-0 -left-2 text-white fill-current drop-shadow-sm">
                     <path d="M5.188 1H0v11.142l4.969-5.063A2 2 0 0 0 5.188 1z" />
                   </svg>
-                  <span className="text-gray-900">{selectedTemplate.content.replace(/\{name\}/g, previewName)}</span>
+                  <span className="text-gray-900">{getPreviewText()}</span>
                 </div>
               </div>
             ) : (

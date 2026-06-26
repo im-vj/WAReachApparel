@@ -194,28 +194,34 @@ export default function SendTab() {
             {isTemplateMode && selectedTemplate && (
               <div className="space-y-3 pt-2 border-t border-gray-800 animate-in fade-in">
                 <div className="text-xs text-gray-400 font-medium tracking-wide uppercase">Template Parameter Options:</div>
-                <div className="bg-gray-800/60 p-3 rounded-lg border border-gray-700/60 text-xs text-primary flex items-center justify-between font-mono">
-                  <span>{'{{1}}'} (Recipient Name)</span>
-                  <span className="text-gray-400 italic font-sans text-[11px]">Auto-bound to contact Name</span>
-                </div>
-                {maxParamIndex >= 2 ? (
-                  Array.from({ length: maxParamIndex - 1 }, (_, i) => i + 2).map(num => (
-                    <div key={num}>
-                      <label className="block text-xs font-medium text-gray-300 mb-1 font-mono">
-                        Parameter {'{{' + num + '}}'} Value
-                      </label>
-                      <input 
-                        type="text" 
-                        className="input-field py-2 text-sm font-sans"
-                        value={paramValues[num] || ''}
-                        onChange={(e) => setParamValues({ ...paramValues, [num]: e.target.value })}
-                        placeholder={`Enter value for {{${num}}}`}
-                        disabled={sending}
-                      />
-                    </div>
-                  ))
+                {maxParamIndex === 0 ? (
+                  <div className="bg-gray-800/40 p-3 rounded-lg border border-gray-700/40 text-xs text-gray-400 italic text-center">
+                    No parameters ({'{{1}}'}, {'{{2}}'}, etc.) required for this template.
+                  </div>
                 ) : (
-                  <div className="text-xs text-gray-500 italic">No additional parameters ({'{{2}}'}, {'{{3}}'}, etc.) required for this template.</div>
+                  <>
+                    <div className="bg-gray-800/60 p-3 rounded-lg border border-gray-700/60 text-xs text-primary flex items-center justify-between font-mono">
+                      <span>{'{{1}}'} (Recipient Name)</span>
+                      <span className="text-gray-400 italic font-sans text-[11px]">Auto-bound to contact Name</span>
+                    </div>
+                    {maxParamIndex >= 2 && (
+                      Array.from({ length: maxParamIndex - 1 }, (_, i) => i + 2).map(num => (
+                        <div key={num}>
+                          <label className="block text-xs font-medium text-gray-300 mb-1 font-mono">
+                            Parameter {'{{' + num + '}}'} Value
+                          </label>
+                          <input 
+                            type="text" 
+                            className="input-field py-2 text-sm font-sans"
+                            value={paramValues[num] || ''}
+                            onChange={(e) => setParamValues({ ...paramValues, [num]: e.target.value })}
+                            placeholder={`Enter value for {{${num}}}`}
+                            disabled={sending}
+                          />
+                        </div>
+                      ))
+                    )}
+                  </>
                 )}
               </div>
             )}

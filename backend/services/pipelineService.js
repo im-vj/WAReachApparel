@@ -1,6 +1,6 @@
 import prisma from '../prismaClient.js';
 import { logger } from '../utils/logger.js';
-import sendQueue from '../queues/sendQueue.js';
+import { sendQueue } from '../queueSetup.js';
 
 /**
  * Calculate the next scheduled execution time for a pipeline

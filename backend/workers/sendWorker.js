@@ -33,6 +33,7 @@ const sendWorker = new Worker('SendMessages', async (job) => {
     
     const formattedName = formatName(contact.displayName);
     const renderedMessage = template.content.replace(/\{name\}/g, formattedName);
+    const hasNameParam = /\{name\}|\{\{\d+\}\}/i.test(template.content || '');
     
     await job.updateProgress({
       total, sent, failed,
@@ -69,7 +70,7 @@ const sendWorker = new Worker('SendMessages', async (job) => {
       renderedMessage,
       isTemplateMode,
       template.metaTemplateName,
-      formattedName,
+      hasNameParam ? formattedName : null,
       finalDocumentUrl,
       template.headerDocumentFilename
     );
@@ -85,7 +86,7 @@ const sendWorker = new Worker('SendMessages', async (job) => {
         renderedMessage,
         isTemplateMode,
         template.metaTemplateName,
-        formattedName,
+        hasNameParam ? formattedName : null,
         finalDocumentUrl,
         template.headerDocumentFilename
       );

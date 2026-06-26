@@ -99,9 +99,9 @@ export default function ContactsTab() {
   const filteredContacts = contacts.filter(c => filter === 'ALL' || c.status === filter);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex gap-4">
+    <div className="space-y-6 animate-in fade-in duration-500 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-900/40 p-4 rounded-2xl border border-gray-800/80 backdrop-blur-md">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <input
             type="file"
             accept=".xlsx, .xls"
@@ -111,33 +111,33 @@ export default function ContactsTab() {
           />
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="btn-primary flex items-center"
+            className="btn-primary flex items-center justify-center grow sm:grow-0"
             disabled={loading}
           >
-            <Upload className="w-4 h-4 mr-2" />
+            <Upload className="w-4 h-4 mr-2 shrink-0" />
             Upload Excel
           </button>
           <button 
             onClick={requestReset}
-            className="btn-secondary flex items-center"
+            className="btn-secondary flex items-center justify-center grow sm:grow-0"
             disabled={loading || contacts.length === 0}
           >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Reset All to Pending
+            <RefreshCw className="w-4 h-4 mr-2 shrink-0" />
+            Reset Pending
           </button>
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-gray-400 text-sm font-medium">Filter:</span>
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">Filter:</span>
           <select 
             value={filter} 
             onChange={(e) => setFilter(e.target.value)}
-            className="input-field py-1.5 w-40 text-sm shadow-none"
+            className="input-field py-2 w-full sm:w-44 text-sm shadow-sm"
           >
             <option value="ALL">All Statuses</option>
-            <option value="PENDING">Pending</option>
-            <option value="SENT">Sent</option>
-            <option value="FAILED">Failed</option>
+            <option value="PENDING">Pending Only</option>
+            <option value="SENT">Sent Successfully</option>
+            <option value="FAILED">Failed Delivery</option>
           </select>
         </div>
       </div>

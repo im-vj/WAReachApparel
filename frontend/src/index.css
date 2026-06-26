@@ -4,35 +4,35 @@
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-all duration-300 shadow-md hover:shadow-primary/20 hover:-translate-y-0.5 border border-primary/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
+    @apply px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5 border border-emerald-400/20 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
   }
   
   .btn-secondary {
-    @apply px-4 py-2 bg-surface-dark-light hover:bg-gray-600 text-gray-200 rounded-lg font-medium transition-all duration-300 shadow-sm hover:-translate-y-0.5 border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+    @apply px-4 py-2.5 bg-gray-800/80 hover:bg-gray-700/80 text-gray-200 rounded-xl font-medium transition-all duration-300 shadow-md hover:shadow-gray-900/50 hover:-translate-y-0.5 border border-gray-700/80 active:translate-y-0 backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
   }
 
   .btn-danger {
-    @apply px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg font-medium transition-all duration-300 shadow-sm border border-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white rounded-xl font-medium transition-all duration-300 shadow-sm border border-rose-500/30 hover:shadow-rose-500/20 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .input-field {
-    @apply w-full bg-surface-dark/50 border border-gray-700/60 rounded-lg px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 hover:border-gray-600 transition-colors shadow-inner;
+    @apply w-full bg-gray-950/50 border border-gray-800 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/70 hover:border-gray-700 transition-all shadow-inner backdrop-blur-sm;
   }
   
   .card {
-    @apply bg-surface-dark rounded-xl shadow-lg border border-gray-800/60 p-6 hover:border-gray-700 transition-all duration-300 relative overflow-hidden;
+    @apply bg-gray-900/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-800/80 p-6 sm:p-8 hover:border-gray-700/60 transition-all duration-300 relative overflow-hidden;
   }
 
   .table-container {
-    @apply w-full overflow-hidden rounded-xl border border-gray-800/80 bg-surface-dark shadow-xl;
+    @apply w-full overflow-x-auto rounded-2xl border border-gray-800/80 bg-gray-900/60 backdrop-blur-xl shadow-2xl;
   }
 
   .table-header {
-    @apply bg-gray-900/80 text-left text-xs font-bold text-gray-400 uppercase tracking-widest px-6 py-4;
+    @apply bg-gray-950/80 text-left text-xs font-bold text-gray-400 uppercase tracking-widest px-6 py-4;
   }
 
   .table-cell {
-    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-300 border-b border-gray-800/50 group-hover:bg-gray-800/30 transition-colors;
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-300 border-b border-gray-800/50 group-hover:bg-gray-800/40 transition-colors;
   }
 }
 
@@ -49,9 +49,9 @@
   background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background-color: #4b5563;
+  background-color: #374151;
   border-radius: 20px;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background-color: #6b7280;
+  background-color: #4b5563;
 }

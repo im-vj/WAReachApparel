@@ -52,16 +52,19 @@ export default function LogTab() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-300">Sending History</h3>
+    <div className="space-y-6 max-w-7xl mx-auto animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-900/40 p-5 rounded-2xl border border-gray-800/80 backdrop-blur-md">
+        <div>
+          <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Campaign History Logs</h3>
+          <p className="text-gray-400 text-xs mt-1">Review delivery outcomes, timestamps, and Meta API response diagnostics.</p>
+        </div>
         <button 
           onClick={exportCsv}
           disabled={logs.length === 0}
-          className="btn-secondary flex items-center"
+          className="btn-secondary flex items-center justify-center w-full sm:w-auto px-5"
         >
-          <Download className="w-4 h-4 mr-2" />
-          Export CSV
+          <Download className="w-4 h-4 mr-2 text-emerald-400" />
+          Export CSV Report
         </button>
       </div>
 

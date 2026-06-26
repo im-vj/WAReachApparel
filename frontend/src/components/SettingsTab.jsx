@@ -71,7 +71,7 @@ export default function SettingsTab() {
   };
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="card">
         <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 mb-6 flex items-center">
           Meta WhatsApp API Configuration

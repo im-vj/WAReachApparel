@@ -306,7 +306,7 @@ export default function PipelinesTab() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-xs font-mono uppercase text-zinc-400 mb-1">Cadence Mode</label>
                   <select
@@ -348,7 +348,7 @@ export default function PipelinesTab() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-xs font-mono uppercase text-zinc-400 mb-1">Target Audience</label>
                   <select

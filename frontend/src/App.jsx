@@ -8,6 +8,7 @@ import SettingsTab from './components/SettingsTab';
 import PipelinesTab from './components/PipelinesTab';
 import Login from './components/Login';
 import toast, { Toaster } from 'react-hot-toast';
+import api from './utils/api';
 
 function App() {
   const [activeTab, setActiveTab] = useState('contacts');
@@ -18,8 +19,25 @@ function App() {
   });
 
   useEffect(() => {
-    const handleLogoutEvent = () => setUser(null);
+    const handleLogoutEvent = (e) => {
+      setUser(null);
+      if (e.detail?.reason) {
+        toast.error(e.detail.reason, { id: 'session_expired', duration: 6000 });
+      }
+    };
     window.addEventListener('wareach_logout', handleLogoutEvent);
+
+    // Verify token validity in background on launch
+    const token = localStorage.getItem('wareach_token');
+    if (token && user) {
+      api.get('/auth/me').then(res => {
+        if (res.data?.user) {
+          setUser(res.data.user);
+          localStorage.setItem('wareach_user', JSON.stringify(res.data.user));
+        }
+      }).catch(() => {});
+    }
+
     return () => window.removeEventListener('wareach_logout', handleLogoutEvent);
   }, []);
 

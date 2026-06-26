@@ -19,9 +19,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('wareach_token');
-      localStorage.removeItem('wareach_user');
-      window.dispatchEvent(new Event('wareach_logout'));
+      const isLoginRequest = error.config?.url?.includes('/auth/login');
+      if (!isLoginRequest) {
+        localStorage.removeItem('wareach_token');
+        localStorage.removeItem('wareach_user');
+        const reason = error.response?.data?.error || 'Your security session has expired. Please log in again.';
+        window.dispatchEvent(new CustomEvent('wareach_logout', { detail: { reason } }));
+      }
     }
     return Promise.reject(error);
   }

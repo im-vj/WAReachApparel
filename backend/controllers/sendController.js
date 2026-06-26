@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import prisma from '../prismaClient.js';
 import { sendMessage } from '../services/whatsappService.js';
 import { sendQueue, sendQueueEvents } from '../queueSetup.js';
+import { logger } from '../utils/logger.js';
 
 export const streamProgress = async (req, res) => {
   const { clientId } = req.params;
@@ -52,6 +53,7 @@ export const startSending = async (req, res) => {
   const clientId = crypto.randomUUID();
   
   try {
+    logger.info('SendController', `Queuing bulkSend job ${clientId} for ${contactIds?.length} contacts`);
     await sendQueue.add('bulkSend', {
       templateId,
       contactIds,
@@ -61,19 +63,27 @@ export const startSending = async (req, res) => {
 
     res.json({ clientId, message: 'Sending started' });
   } catch (err) {
+    logger.error('SendController', 'Error starting bulk send job', err);
     res.status(500).json({ error: err.message });
   }
 };
 
 export const sendTest = async (req, res) => {
-  const { phone, message } = req.body;
-  if (!phone) {
-    return res.status(400).json({ error: 'Phone number is required' });
-  }
-  const waRes = await sendMessage(phone, message || 'Test message from WAReach', false, null, null);
-  if (waRes.success) {
-    res.json(waRes);
-  } else {
-    res.status(400).json(waRes);
+  try {
+    const { phone, message } = req.body;
+    if (!phone) {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+    logger.info('SendController', `Sending test message to ${phone}`);
+    const waRes = await sendMessage(phone, message || 'Test message from WAReach', false, null, null);
+    if (waRes.success) {
+      res.json(waRes);
+    } else {
+      logger.warn('SendController', `Test message failed to ${phone}: ${waRes.error}`);
+      res.status(400).json(waRes);
+    }
+  } catch (err) {
+    logger.error('SendController', 'Exception in sendTest', err);
+    res.status(500).json({ error: err.message });
   }
 };

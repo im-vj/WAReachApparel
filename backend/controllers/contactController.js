@@ -1,11 +1,13 @@
 import prisma from '../prismaClient.js';
 import ExcelJS from 'exceljs';
+import { logger } from '../utils/logger.js';
 
 export const getAllContacts = async (req, res) => {
   try {
     const contacts = await prisma.contact.findMany();
     res.json(contacts);
   } catch (error) {
+    logger.error('ContactController', 'Error fetching contacts', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -83,9 +85,10 @@ export const importContacts = async (req, res) => {
     await prisma.$transaction(operations);
     imported = operations.length;
 
+    logger.info('ContactController', `Successfully imported ${imported} contacts`);
     res.json({ message: `${imported} contacts imported successfully`, imported });
   } catch (error) {
-    console.error(error);
+    logger.error('ContactController', 'Error importing contacts', error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -94,8 +97,10 @@ export const deleteContact = async (req, res) => {
   try {
     await prisma.sendLog.deleteMany({ where: { contactId: Number(req.params.id) } });
     await prisma.contact.delete({ where: { id: Number(req.params.id) } });
+    logger.info('ContactController', `Deleted contact ${req.params.id}`);
     res.json({ message: 'Deleted successfully' });
   } catch (error) {
+    logger.error('ContactController', `Error deleting contact ${req.params.id}`, error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -109,8 +114,10 @@ export const resetContacts = async (req, res) => {
         waMessageId: null
       }
     });
+    logger.info('ContactController', 'All contacts reset to PENDING');
     res.json({ message: 'All contacts reset to PENDING' });
   } catch (error) {
+    logger.error('ContactController', 'Error resetting contacts', error);
     res.status(500).json({ error: error.message });
   }
 };

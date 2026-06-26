@@ -4,12 +4,13 @@ import multerS3 from 'multer-s3';
 import { S3Client } from '@aws-sdk/client-s3';
 import path from 'path';
 import crypto from 'crypto';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
 // Ensure AWS Environment Variables are set (will log warning if not)
 if (!process.env.AWS_REGION || !process.env.AWS_S3_BUCKET_NAME) {
-  console.warn("WARNING: AWS_REGION or AWS_S3_BUCKET_NAME is not set. S3 uploads may fail.");
+  logger.warn('UploadRoutes', 'AWS_REGION or AWS_S3_BUCKET_NAME is not set. S3 uploads may fail.');
 }
 
 const s3 = new S3Client({
@@ -37,17 +38,23 @@ const upload = multer({
 });
 
 router.post('/', upload.single('file'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
-  }
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
 
-  // multer-s3 automatically populates req.file.location with the public URL
-  res.json({
-    message: 'File uploaded successfully',
-    url: req.file.location, // S3 Public URL
-    filename: req.file.originalname,
-    storedFilename: req.file.key // The S3 Key
-  });
+    logger.info('UploadRoutes', `File uploaded successfully: ${req.file.originalname} -> ${req.file.key}`);
+    // multer-s3 automatically populates req.file.location with the public URL
+    res.json({
+      message: 'File uploaded successfully',
+      url: req.file.location, // S3 Public URL
+      filename: req.file.originalname,
+      storedFilename: req.file.key // The S3 Key
+    });
+  } catch (err) {
+    logger.error('UploadRoutes', 'Error handling file upload response', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;

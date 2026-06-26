@@ -1,4 +1,5 @@
 import prisma from '../prismaClient.js';
+import { logger } from '../utils/logger.js';
 
 export const getAllLogs = async (req, res) => {
   try {
@@ -8,6 +9,7 @@ export const getAllLogs = async (req, res) => {
     });
     res.json(logs);
   } catch (error) {
+    logger.error('LogController', 'Error fetching send logs', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -22,6 +24,7 @@ export const getStatusCounts = async (req, res) => {
     
     res.json({ total, pending, sent, failed, skipped });
   } catch (error) {
+    logger.error('LogController', 'Error fetching status counts', error);
     res.status(500).json({ error: error.message });
   }
 };

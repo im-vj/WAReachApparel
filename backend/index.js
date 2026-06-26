@@ -10,9 +10,19 @@ import { initSettings } from './services/settingsService.js';
 import { initTemplates } from './services/templateService.js';
 import './workers/sendWorker.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import { logger } from './utils/logger.js';
 
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+// Global exception handlers
+process.on('uncaughtException', (err) => {
+  logger.error('Process', 'Uncaught Exception', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Process', 'Unhandled Rejection at Promise', reason);
+});
 
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -41,7 +51,15 @@ app.use('/api/', apiLimiter);
 
 // Request logger
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    if (res.statusCode >= 400) {
+      logger.warn('HTTP', `${req.method} ${req.originalUrl} ${res.statusCode} (${duration}ms)`);
+    } else {
+      logger.info('HTTP', `${req.method} ${req.originalUrl} ${res.statusCode} (${duration}ms)`);
+    }
+  });
   next();
 });
 
@@ -55,19 +73,26 @@ app.use('/api/upload', uploadRoutes);
 // Serve uploads folder statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Global Error Handling Middleware
+app.use((err, req, res, next) => {
+  logger.error('Express', `Unhandled error in ${req.method} ${req.originalUrl}`, err);
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal Server Error'
+  });
+});
 
 // Initialize DB defaults
 const init = async () => {
   try {
     await initSettings();
     await initTemplates();
-    console.log('Database defaults initialized.');
+    logger.info('Server', 'Database defaults initialized.');
   } catch (err) {
-    console.error('Failed to initialize database defaults:', err);
+    logger.error('Server', 'Failed to initialize database defaults:', err);
   }
 };
 
 app.listen(PORT, '0.0.0.0', async () => {
-  console.log(`Server is running on port ${PORT}`);
+  logger.info('Server', `Server is running on port ${PORT}`);
   await init();
 });

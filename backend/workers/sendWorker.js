@@ -4,6 +4,7 @@ import prisma from '../prismaClient.js';
 import { sendMessage } from '../services/whatsappService.js';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { logger } from '../utils/logger.js';
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -18,6 +19,7 @@ const sendWorker = new Worker('SendMessages', async (job) => {
   let sent = 0;
   let failed = 0;
   const total = contactIds.length;
+  logger.info('SendWorker', `Starting job ${job.id}: processing ${total} contacts (Template ID: ${templateId})`);
 
   for (let i = 0; i < total; i++) {
     const contactId = contactIds[i];
@@ -58,7 +60,7 @@ const sendWorker = new Worker('SendMessages', async (job) => {
         // Generate a URL valid for 1 hour
         finalDocumentUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
       } catch (err) {
-        console.error('Failed to generate presigned URL', err);
+        logger.error('SendWorker', 'Failed to generate presigned URL', err);
       }
     }
 
@@ -112,12 +114,14 @@ const sendWorker = new Worker('SendMessages', async (job) => {
 
     if (waRes.success) {
       sent++;
+      logger.info('SendWorker', `Job ${job.id}: [SENT] ${contact.displayName} (${contact.phoneNumber}) -> Msg ID: ${waRes.messageId}`);
       await job.updateProgress({
         total, sent, failed,
         current: { contactId: contact.id, name: contact.displayName, status: 'SENT', message: `Sent (msg id: ${waRes.messageId})` }
       });
     } else {
       failed++;
+      logger.warn('SendWorker', `Job ${job.id}: [FAILED] ${contact.displayName} (${contact.phoneNumber}) -> Reason: ${waRes.error}`);
       await job.updateProgress({
         total, sent, failed,
         current: { contactId: contact.id, name: contact.displayName, status: 'FAILED', message: `Failed: ${waRes.error}` }
@@ -133,11 +137,12 @@ const sendWorker = new Worker('SendMessages', async (job) => {
 }, { connection: redisConnection, concurrency: 1 });
 
 sendWorker.on('completed', job => {
-  console.log(`Job ${job.id} has completed!`);
+  const { total = 0, sent = 0, failed = 0 } = job.returnvalue || {};
+  logger.info('SendWorker', `Job ${job.id} finished. Summary -> Total: ${total}, Sent: ${sent}, Failed: ${failed}`);
 });
 
 sendWorker.on('failed', (job, err) => {
-  console.log(`Job ${job.id} has failed with ${err.message}`);
+  logger.error('SendWorker', `Job ${job?.id} failed with exception`, err);
 });
 
 export default sendWorker;

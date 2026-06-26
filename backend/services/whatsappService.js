@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getSettingsMap } from './settingsService.js';
+import { logger } from '../utils/logger.js';
 
 export const sendMessage = async (phoneNumber, message, isTemplateMode, templateName, templateVar, documentUrl, documentFilename) => {
   const response = { success: false, messageId: null, error: null, fullResponse: null, isRateLimited: false };
@@ -62,7 +63,7 @@ export const sendMessage = async (phoneNumber, message, isTemplateMode, template
       }
     }
 
-    console.log(`Sending message to ${phoneNumber}:`, JSON.stringify(body));
+    logger.info('WhatsAppService', `Sending message to ${phoneNumber}: ${JSON.stringify(body)}`);
 
     const res = await axios.post(url, body, {
       headers: {
@@ -75,12 +76,19 @@ export const sendMessage = async (phoneNumber, message, isTemplateMode, template
     if (res.data.messages && res.data.messages.length > 0) {
       response.success = true;
       response.messageId = res.data.messages[0].id;
+      logger.info('WhatsAppService', `Successfully sent message to ${phoneNumber} -> Msg ID: ${response.messageId}`);
     } else {
       response.error = 'Unknown success response format';
+      logger.warn('WhatsAppService', `Unknown success response format for ${phoneNumber}: ${response.fullResponse}`);
     }
   } catch (error) {
-    response.error = error.response?.data?.error?.message || error.message;
-    response.fullResponse = JSON.stringify(error.response?.data || error.message);
+    const errorMsg = error.response?.data?.error?.message || error.message;
+    const errorDetails = error.response?.data || error.message;
+    
+    response.error = errorMsg;
+    response.fullResponse = JSON.stringify(errorDetails);
+    
+    logger.error('WhatsAppService', `Failed sending message to ${phoneNumber}: ${errorMsg}`, error);
     
     if (response.error.includes('130429') || (error.response && error.response.status === 429)) {
       response.isRateLimited = true;

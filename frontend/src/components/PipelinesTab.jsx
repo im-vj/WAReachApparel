@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Workflow, Play, Pause, Trash2, Plus, Clock, Filter, Layers, Zap, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Workflow, Play, Pause, Trash2, Plus, Clock, Filter, Layers, Zap, CheckCircle2, AlertCircle, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 import ConfirmModal from './ConfirmModal';
@@ -9,6 +9,7 @@ export default function PipelinesTab() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null, name: '' });
 
@@ -48,7 +49,39 @@ export default function PipelinesTab() {
     }
   };
 
-  const handleCreate = async (e) => {
+  const handleOpenCreate = () => {
+    setEditingId(null);
+    setFormData({
+      name: '',
+      description: '',
+      triggerType: 'INTERVAL',
+      intervalMins: 60,
+      dailyTime: '10:00',
+      targetStatus: 'PENDING',
+      templateId: templates[0]?.id || '',
+      batchSize: 50,
+      delayMs: 2000
+    });
+    setIsCreateOpen(true);
+  };
+
+  const handleOpenEdit = (pipe) => {
+    setEditingId(pipe.id);
+    setFormData({
+      name: pipe.name || '',
+      description: pipe.description || '',
+      triggerType: pipe.triggerType || 'INTERVAL',
+      intervalMins: pipe.intervalMins || 60,
+      dailyTime: pipe.dailyTime || '10:00',
+      targetStatus: pipe.targetStatus || 'PENDING',
+      templateId: pipe.templateId || templates[0]?.id || '',
+      batchSize: pipe.batchSize || 50,
+      delayMs: pipe.delayMs || 2000
+    });
+    setIsCreateOpen(true);
+  };
+
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.templateId) {
       toast.error('Pipeline name and template are required');
@@ -57,9 +90,15 @@ export default function PipelinesTab() {
 
     try {
       setSubmitting(true);
-      await api.post('/pipelines', formData);
-      toast.success('Automation pipeline deployed successfully!');
+      if (editingId) {
+        await api.put(`/pipelines/${editingId}`, formData);
+        toast.success('Automation pipeline updated successfully!');
+      } else {
+        await api.post('/pipelines', formData);
+        toast.success('Automation pipeline deployed successfully!');
+      }
       setIsCreateOpen(false);
+      setEditingId(null);
       setFormData({
         name: '',
         description: '',
@@ -73,7 +112,7 @@ export default function PipelinesTab() {
       });
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to create pipeline');
+      toast.error(err.response?.data?.error || 'Failed to save pipeline');
     } finally {
       setSubmitting(false);
     }
@@ -179,7 +218,7 @@ export default function PipelinesTab() {
             Create your first automated messaging loop to continuously nurture pending contacts without manual clicking.
           </p>
           <button
-            onClick={() => setIsCreateOpen(true)}
+            onClick={handleOpenCreate}
             className="btn-secondary mt-6 text-xs"
           >
             Create Automation Loop
@@ -253,6 +292,14 @@ export default function PipelinesTab() {
                 </button>
 
                 <button
+                  onClick={() => handleOpenEdit(pipe)}
+                  title="Edit Pipeline Configuration"
+                  className="p-2 bg-white/[0.04] hover:bg-white/[0.08] text-cyan-400 rounded-lg transition-colors border border-white/[0.08]"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+
+                <button
                   onClick={() => handleToggle(pipe.id, pipe.name)}
                   title={pipe.isActive ? 'Pause Pipeline' : 'Resume Pipeline'}
                   className="p-2 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 rounded-lg transition-colors border border-white/[0.08]"
@@ -278,11 +325,11 @@ export default function PipelinesTab() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
           <div className="card w-full max-w-lg bg-[#0e1017] border-white/[0.1] p-6 sm:p-8 relative">
             <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-              <Workflow className="w-5 h-5 text-emerald-400" /> Deploy Autonomous Campaign Pipeline
+              <Workflow className="w-5 h-5 text-emerald-400" /> {editingId ? 'Edit Autonomous Campaign Pipeline' : 'Deploy Autonomous Campaign Pipeline'}
             </h3>
             <p className="text-xs text-zinc-400 mb-6">Set background automation rules to continuously broadcast WhatsApp campaigns.</p>
 
-            <form onSubmit={handleCreate} className="space-y-4 text-sm">
+            <form onSubmit={handleSave} className="space-y-4 text-sm">
               <div>
                 <label className="block text-xs font-mono uppercase text-zinc-400 mb-1">Pipeline Identifier</label>
                 <input
@@ -406,7 +453,7 @@ export default function PipelinesTab() {
                   className="btn-primary py-2 px-5 text-xs shadow-lg shadow-emerald-500/20"
                   disabled={submitting || templates.length === 0}
                 >
-                  {submitting ? 'Deploying...' : 'Deploy Automation'}
+                  {submitting ? 'Saving...' : editingId ? 'Save Changes' : 'Deploy Automation'}
                 </button>
               </div>
             </form>

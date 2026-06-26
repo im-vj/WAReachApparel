@@ -24,6 +24,20 @@ export const create = async (req, res) => {
   }
 };
 
+export const update = async (req, res) => {
+  try {
+    const { name, templateId } = req.body;
+    if (!name || !templateId) {
+      return res.status(400).json({ error: 'Pipeline Name and Target Template are required.' });
+    }
+    const updated = await pipelineService.updatePipeline(req.params.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    logger.error('PipelineController', 'Update error', err);
+    res.status(400).json({ error: err.message || 'Failed to update automation loop' });
+  }
+};
+
 export const toggle = async (req, res) => {
   try {
     const updated = await pipelineService.togglePipeline(req.params.id);

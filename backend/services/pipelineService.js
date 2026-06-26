@@ -79,6 +79,38 @@ export async function createPipeline(data) {
 }
 
 /**
+ * Update existing automated campaign pipeline
+ */
+export async function updatePipeline(id, data) {
+  const { name, description, triggerType, intervalMins, dailyTime, targetStatus, templateId, batchSize, delayMs } = data;
+  
+  const existing = await prisma.pipeline.findUnique({ where: { id: Number(id) } });
+  if (!existing) throw new Error('Pipeline not found');
+
+  const tempPipeline = { triggerType, intervalMins: Number(intervalMins || 60), dailyTime };
+  const nextRunAt = calculateNextRun(tempPipeline);
+
+  const updated = await prisma.pipeline.update({
+    where: { id: existing.id },
+    data: {
+      name: String(name).trim(),
+      description: description ? String(description).trim() : null,
+      triggerType: String(triggerType || 'INTERVAL'),
+      intervalMins: intervalMins ? Number(intervalMins) : null,
+      dailyTime: dailyTime || null,
+      targetStatus: String(targetStatus || 'PENDING'),
+      templateId: Number(templateId),
+      batchSize: Number(batchSize || 50),
+      delayMs: Number(delayMs || 2000),
+      nextRunAt
+    }
+  });
+
+  logger.info('PipelineService', `Updated pipeline: ${updated.name}`);
+  return updated;
+}
+
+/**
  * Toggle Pipeline active state (Pause / Resume)
  */
 export async function togglePipeline(id) {

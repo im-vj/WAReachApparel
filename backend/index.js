@@ -39,9 +39,16 @@ const PORT = process.env.PORT || 8080;
 // Trust the first proxy (e.g. Nginx, Heroku, etc.) to fix express-rate-limit X-Forwarded-For error
 app.set('trust proxy', 1);
 
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" } // Allow loading S3/static media
+}));
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGIN || '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Basic rate limiting to prevent brute-force and DDoS
 const apiLimiter = rateLimit({

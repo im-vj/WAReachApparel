@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { signToken } from '../utils/jwt.js';
 import { logger } from '../utils/logger.js';
 import prisma from '../prismaClient.js';
@@ -5,6 +6,18 @@ import prisma from '../prismaClient.js';
 // Default fallback credentials
 const DEFAULT_EMAIL = process.env.ADMIN_EMAIL || 'admin@company.com';
 const DEFAULT_PASS = process.env.ADMIN_PASSWORD || 'ChangeMe@123';
+
+/**
+ * Constant-time comparison to protect against timing attacks
+ */
+function safeEqual(inputStr, targetStr) {
+  const bufInput = Buffer.from(String(inputStr || ''));
+  const bufTarget = Buffer.from(String(targetStr || ''));
+  if (bufInput.length !== bufTarget.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(bufInput, bufTarget);
+}
 
 /**
  * Helper to fetch dynamic admin credentials from Database
@@ -38,7 +51,7 @@ export const login = async (req, res) => {
     const validCreds = await getAdminCreds();
     const trimmedEmail = String(email).trim().toLowerCase();
 
-    if (trimmedEmail === validCreds.email.trim().toLowerCase() && password === validCreds.password) {
+    if (trimmedEmail === validCreds.email.trim().toLowerCase() && safeEqual(password, validCreds.password)) {
       const user = {
         email: validCreds.email,
         name: validCreds.email.split('@')[0].toUpperCase(),

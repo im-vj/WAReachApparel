@@ -25,7 +25,6 @@ const upload = multer({
   storage: multerS3({
     s3: s3,
     bucket: process.env.AWS_S3_BUCKET_NAME || 'my-apparel-bucket',
-    // acl: 'public-read', // Uncomment if your bucket allows ACLs, otherwise ensure bucket policy allows public read
     metadata: function (req, file, cb) {
       cb(null, { fieldName: file.fieldname });
     },
@@ -34,10 +33,28 @@ const upload = multer({
       const ext = path.extname(file.originalname);
       cb(null, `uploads/${uniqueSuffix}${ext}`);
     }
-  })
+  }),
+  limits: { fileSize: 16 * 1024 * 1024 }, // 16MB max WhatsApp broadcast limit
+  fileFilter: (req, file, cb) => {
+    const allowedPrefixes = ['image/', 'video/', 'audio/', 'application/pdf'];
+    if (allowedPrefixes.some(prefix => file.mimetype.startsWith(prefix))) {
+      cb(null, true);
+    } else {
+      cb(new Error('Security violation: Unsupported broadcast media type. Only images, audio, video, or PDFs are permitted.'));
+    }
+  }
 });
 
-router.post('/', upload.single('file'), (req, res) => {
+router.post('/', (req, res, next) => {
+  upload.single('file')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      return res.status(400).json({ error: `Upload rejection: ${err.message}` });
+    } else if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    next();
+  });
+}, (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
